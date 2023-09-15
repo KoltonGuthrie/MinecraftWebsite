@@ -3,7 +3,8 @@
 <h3>Messages:</h3>
 <div id="messages"></div>
 <script>
-    const socket = new WebSocket("ws://localhost:8888/ws")
+    const imageID = new URL(document.URL).searchParams.get('id');
+    const socket = new WebSocket(`ws://localhost:8888/ws?id=${imageID}`)
 
     socket.addEventListener("message", e => {
         const msg = JSON.parse(e.data);

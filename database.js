@@ -89,7 +89,7 @@ export function addWebsocket({ id, userID, imageID, ws }) {
 	return getWebsocket({id, userID, data: true});
 }
 
-export function getWebsocket({id = '%', userID = '%', image_ID = '%', data = false}) {
+export function getWebsocket({id = '%', userID = '%', imageID = '%', data = false}) {
 	const query = db.prepare(`SELECT * FROM websockets WHERE id LIKE ? AND user_id LIKE ? AND image_id LIKE ?;`, [id, userID, imageID]);
 	const socket = query.get();
     if(!socket) return null;

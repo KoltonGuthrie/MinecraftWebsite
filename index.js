@@ -86,16 +86,13 @@ const server = Bun.serve({
                 user = addUser({id: userID, username: "john_doe", token: token});
             }
 
-            const socket = addWebsocket({ id: websocketID, userID: user.id, ws});
-
-            // Get image
+            const socket = addWebsocket({ id: websocketID, userID: user.id, imageID, ws});
 
             const CHILD_DATA = {
-                input_file: "",
                 id: imageID,
             }
 
-            const proc = Bun.spawn(["bun", "background.js", ""], {
+            const proc = Bun.spawn(["bun", "background.js", JSON.stringify(CHILD_DATA)], {
                 onExit(proc, exitCode, signalCode, error) {
                     const websocket = getWebsocket({id: socket.id});
 
@@ -108,7 +105,7 @@ const server = Bun.serve({
                     } 
                     // Send to websocket
                     
-                    websocket.send({message: `Process ${proc.id} ended with exitCode: ${exitCode}, signalCode: ${signalCode}, and error: ${error || null}`});
+                    websocket.send(JSON.stringify({message: `Process ${proc.id} ended with exitCode: ${exitCode}, signalCode: ${signalCode}, and error: ${error || null}`}));
                 },
             });
 

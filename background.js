@@ -1,6 +1,8 @@
 const { StatusCodes } = require("./statusCodes.js");
 const { ErrorCodes } = require("./errorCodes.js");
 
+const args = JSON.parse(process.argv.slice(2));
+
 async function output(json) {
     process.stdout.write(JSON.stringify(JSON.stringify(json)));
 	await Bun.sleep(1); // Outputs were being sent at the same time
@@ -14,6 +16,8 @@ async function output(json) {
 		await output({ status: StatusCodes.running });
 
 		await output({ message: `I have an id of: ${id}` });
+
+		await output({message: args})
 
 		/*
 		const { Image } = require("image-js");
