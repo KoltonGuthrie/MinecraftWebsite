@@ -88,7 +88,7 @@ const server = Bun.serve({
                     } 
                     // Send to websocket
                     
-                    websocket.send(`Process ${proc.id} ended with exitCode: ${exitCode}, signalCode: ${signalCode}, and error: ${error || null}`);
+                    websocket.send({message: `Process ${proc.id} ended with exitCode: ${exitCode}, signalCode: ${signalCode}, and error: ${error || null}`});
                 },
             });
 
@@ -101,7 +101,7 @@ const server = Bun.serve({
                     updateImage({websocketID: socket.id, key: 'status', value: json?.status});
                 }
 
-                websocket.send(JSON.stringify(json));
+                websocket.send(json);
 
             }
 
