@@ -12,28 +12,7 @@ const server = Bun.serve({
         const path = URL(req.url).pathname.toLowerCase();
 
         if(path === '/') {
-            return new Response("Welcome to Bun!!", {status: 200});
-        }
-
-        if(path === '/test') {
-            try {
-                i++;
-                const CHILD_DATA = {
-                    id: i,
-                };
-                console.log("Starting process " + i)
-
-                const proc = Bun.spawn(["bun", "background.js"], {
-                    onExit(proc, exitCode, signalCode, error) {
-                        console.log(`#${CHILD_DATA.id} Process ${proc.pid} ended with exitCode: ${exitCode}, signalCode: ${signalCode}, and error: ${error || null}`);
-                        // Send to websocket
-                    },
-                });
-
-                return new Response("ok", {status: 200});
-            } catch(err) {
-                return new Response(err.stack, {status: 500});
-            }
+            return new Response(Bun.file('index.html'), {status: 200});
         }
 
         if(path === '/ws') {
@@ -52,8 +31,43 @@ const server = Bun.serve({
                 str += serialize(key, value) + ';';
             }
 
-            const success = server.upgrade(req, { data: { token }, headers: { 'Set-Cookie': str }});
+            const imageID = URL(req.url).searchParams.get('id') || null;
+
+            const success = server.upgrade(req, { data: { token, imageID }, headers: { 'Set-Cookie': str }});
             return success ? undefined : new Response("WebSocket upgrade error", { status: 400 });
+        }
+
+        if (path === '/upload') {
+            const formdata = await req.formData();
+            const name = formdata.get('name');
+            const profilePicture = formdata.get('profilePicture');
+            if (!profilePicture) throw new Error('Must upload a profile picture.');
+            // write profilePicture to disk
+            await Bun.write('profilePicture.png', profilePicture);
+
+            const cookies = parse(req.headers.get("cookie") || "");
+            let token = cookies.token;
+
+            let user = getUser({token});
+
+            if(user === null) {
+                const userID = uuidv4();
+                user = addUser({id: userID, username: "john_doe", token: token});
+            }
+
+            const imageID = uuidv4();
+            addImage({id: imageID, userID: user.id, created: new Date().getTime(), status: StatusCodes.starting});
+
+            return Response.redirect(`/image?id=${imageID}`);
+        }
+
+        if(path === '/image') {
+            const imageID = URL(req.url).searchParams.get('id') || null;
+            const image = getImage({id: imageID});
+
+            if(image === null) return new Response(`Unknown image id!`, {status: 404});
+
+            return new Response(Bun.file('image.html'), {status: 200});
         }
 
         return new Response(`${path} is an unknown page!`, {status: 404});
@@ -62,6 +76,7 @@ const server = Bun.serve({
         idleTimeout: 60,
         async open(ws) {
             const token = ws.data.token;
+            const imageID = ws.data.imageID;
             const websocketID = uuidv4();
 
             let user = getUser({token});
@@ -73,9 +88,14 @@ const server = Bun.serve({
 
             const socket = addWebsocket({ id: websocketID, userID: user.id, ws});
 
-            addImage({id: uuidv4(), websocketID: socket.id, userID: user.id, created: new Date().getTime(), status: StatusCodes.running});
+            // Get image
 
-            const proc = Bun.spawn(["bun", "background.js"], {
+            const CHILD_DATA = {
+                input_file: "",
+                id: imageID,
+            }
+
+            const proc = Bun.spawn(["bun", "background.js", ""], {
                 onExit(proc, exitCode, signalCode, error) {
                     const websocket = getWebsocket({id: socket.id});
 

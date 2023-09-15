@@ -22,7 +22,8 @@ function init() {
 		`CREATE TABLE 'websockets'
             (
             'id' STRING NOT NULL,
-            'user_id' STRING NOT NULL
+            'user_id' STRING NOT NULL,
+			'image_id' STRING NOT NULL
             );`
 	);
 	db.run(
@@ -39,7 +40,8 @@ function init() {
             'id' STRING NOT NULL,
             'websocket_id' STRING NOT NULL,
             'user_id' STRING NOT NULL,
-            'file' STRING,
+			'original_file' STRING NOT NULL,
+            'minecraft_file' STRING NOT NULL,
             'created' STRING NOT NULL,
             'status' INTEGER NOT NULL
             );`
@@ -53,8 +55,8 @@ export function updateImage({ id = "%", websocketID = "%", key, value }) {
     return getImage({ id, websocketID });
 }
 
-export function addImage({id, websocketID, userID, file = null, created, status}) {
-    const query = db.prepare(`INSERT INTO images(id, websocket_id, user_id, file, created, status) VALUES(?,?,?,?,?,?);`,[id, websocketID, userID, file, created, status]);
+export function addImage({id, websocketID = 'null', userID, original_file = 'null', minecraft_file = 'null', created, status}) {
+    const query = db.prepare(`INSERT INTO images(id, websocket_id, user_id, original_file, minecraft_file, created, status) VALUES(?,?,?,?,?,?,?);`,[id, websocketID, userID, original_file, minecraft_file, created, status]);
 	query.run();
 	return getImage({ id, websocketID });
 }
@@ -75,20 +77,20 @@ export function getUser({ id = "%", username = "%", token = "%" }) {
 	return query.get();
 }
 
-export function addWebsocket({ id, userID, ws }) {
+export function addWebsocket({ id, userID, imageID, ws }) {
 	const query = db.prepare(
 		`INSERT INTO websockets
-        (id, user_id) VALUES
-        (?,?);`,
-        [id, userID]
+        (id, user_id, image_id) VALUES
+        (?,?,?);`,
+        [id, userID, imageID]
 	);
     query.run();
     websockets.set(id, ws);
 	return getWebsocket({id, userID, data: true});
 }
 
-export function getWebsocket({id = '%', userID = '%', data = false}) {
-	const query = db.prepare(`SELECT * FROM websockets WHERE id LIKE ? AND user_id LIKE ?;`, [id, userID]);
+export function getWebsocket({id = '%', userID = '%', image_ID = '%', data = false}) {
+	const query = db.prepare(`SELECT * FROM websockets WHERE id LIKE ? AND user_id LIKE ? AND image_id LIKE ?;`, [id, userID, imageID]);
 	const socket = query.get();
     if(!socket) return null;
     return data ? socket : websockets.get(socket.id);
