@@ -48,22 +48,22 @@ const server = Bun.serve({
             const cookies = parse(req.headers.get("cookie") || "");
             let token = cookies.token;
 
-            let user = getUser({token});
+            let user = await getUser({token});
 
             if(user === null) {
                 const userID = uuidv4();
-                user = addUser({id: userID, username: "john_doe", token: token});
+                user = await addUser({id: userID, username: "john_doe", token: token});
             }
 
             const imageID = uuidv4();
-            addImage({id: imageID, userID: user.id, created: new Date().getTime(), status: StatusCodes.starting});
+            await addImage({id: imageID, userID: user.id, created: new Date().getTime(), status: StatusCodes.starting});
 
             return Response.redirect(`/image?id=${imageID}`);
         }
 
         if(path === '/image') {
             const imageID = URL(req.url).searchParams.get('id') || null;
-            const image = getImage({id: imageID});
+            const image = await getImage({id: imageID});
 
             if(image === null) return new Response(`Unknown image id!`, {status: 404});
 
@@ -79,27 +79,27 @@ const server = Bun.serve({
             const imageID = ws.data.imageID;
             const websocketID = uuidv4();
 
-            let user = getUser({token});
+            let user = await getUser({token});
 
             if(user === null) {
                 const userID = uuidv4();
-                user = addUser({id: userID, username: "john_doe", token: token});
+                user = await addUser({id: userID, username: "john_doe", token: token});
             }
 
-            const socket = addWebsocket({ id: websocketID, userID: user.id, imageID, ws});
+            const socket = await addWebsocket({ id: websocketID, userID: user.id, imageID, ws});
 
             const CHILD_DATA = {
                 id: imageID,
             }
 
             const proc = Bun.spawn(["bun", "background.js", JSON.stringify(CHILD_DATA)], {
-                onExit(proc, exitCode, signalCode, error) {
-                    const websocket = getWebsocket({id: socket.id});
+                async onExit(proc, exitCode, signalCode, error) {
+                    const websocket = await getWebsocket({id: socket.id});
 
                     if(exitCode > 0) {
                         // ERROR
                         console.log(`Process ${proc.id} ended with exitCode: ${exitCode}, signalCode: ${signalCode}, and error: ${error || null}`);
-                        updateImage({websocketID: socket.id, key: 'status', value: StatusCodes.error});
+                        await updateImage({websocketID: socket.id, key: 'status', value: StatusCodes.error});
                         const msg = {message: "There was an internal error", errorData: error, status: StatusCodes.error}
                         return websocket.send(JSON.stringify(msg));
                     } 
@@ -110,12 +110,12 @@ const server = Bun.serve({
             });
 
             for await (const chunk of proc.stdout) {
-                const websocket = getWebsocket({id: socket.id});
+                const websocket = await getWebsocket({id: socket.id});
 
                 const json = JSON.parse(new TextDecoder().decode(chunk));
 
                 if(Object.keys(StatusCodes)[json?.status] !== undefined) {
-                    updateImage({websocketID: socket.id, key: 'status', value: json?.status});
+                    await updateImage({websocketID: socket.id, key: 'status', value: json?.status});
                 }
 
                 websocket.send(json);
