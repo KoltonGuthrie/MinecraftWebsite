@@ -106,6 +106,6 @@ export async function getWebsocket({id = '%', userID = '%', imageID = '%', data 
 	const query = db.prepare(`SELECT * FROM websockets WHERE id LIKE ? AND user_id LIKE ? AND image_id LIKE ?;`, [id, userID, imageID]);
 	const result = query.get();
 	db.close();
-    if(!socket) return null;
-    return data ? result : websockets.get(socket.id);
+    if(!result) return null;
+    return data ? result : websockets.get(result.id);
 }
