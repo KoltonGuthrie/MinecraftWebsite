@@ -66,8 +66,9 @@ export async function addImage({id, websocketID = 'null', userID, original_file 
 export async function getImage({ id = "%", websocketID = "%" }) {
 	const db = await connect();
     const query = db.prepare(`SELECT * FROM images WHERE id LIKE ? AND websocket_id LIKE ?;`,[id, websocketID]);
+	const result = query.get();
 	db.close();
-	return query.get();
+	return result;
 }
 
 export async function addUser({ id, username, token }) {
@@ -81,8 +82,9 @@ export async function addUser({ id, username, token }) {
 export async function getUser({ id = "%", username = "%", token = "%" }) {
 	const db = await connect();
 	const query = db.prepare(`SELECT * FROM users WHERE id LIKE ? AND username LIKE ? AND token LIKE ?;`,[id, username, token]);
+	const result = query.get();
 	db.close();
-	return query.get();
+	return result;
 }
 
 export async function addWebsocket({ id, userID, imageID, ws }) {
@@ -102,8 +104,8 @@ export async function addWebsocket({ id, userID, imageID, ws }) {
 export async function getWebsocket({id = '%', userID = '%', imageID = '%', data = false}) {
 	const db = await connect();
 	const query = db.prepare(`SELECT * FROM websockets WHERE id LIKE ? AND user_id LIKE ? AND image_id LIKE ?;`, [id, userID, imageID]);
-	const socket = query.get();
+	const result = query.get();
 	db.close();
     if(!socket) return null;
-    return data ? socket : websockets.get(socket.id);
+    return data ? result : websockets.get(socket.id);
 }
