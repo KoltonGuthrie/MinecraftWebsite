@@ -1,18 +1,20 @@
 const { StatusCodes } = require("./statusCodes.js");
 const { ErrorCodes } = require("./errorCodes.js");
 
-const output = function(str) {
-    process.stdout.write(str);
+function output(str) {
+    process.stdout.write(JSON.stringify(str));
+	return;
 }
 
 (async () => {
 	try {
-		output(JSON.stringify({ status: StatusCodes.running }));
+		output({ status: StatusCodes.running });
 
-		await Bun.sleep(Math.randdom() * 1000 * 10);
+		await Bun.sleep(Math.random() * 1000 * 10);
 
-		output(JSON.stringify({ status: StatusCodes.done }));
+		output({ status: StatusCodes.done });
 	} catch (err) {
+		output({ status: StatusCodes.error, erorr_code: ErrorCodes.unknown_error, error: err.toString() });
 		process.exit(ErrorCodes.unknown_error);
 	}
 })();
