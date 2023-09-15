@@ -1,7 +1,8 @@
 const { StatusCodes } = require("./statusCodes.js");
 const { ErrorCodes } = require("./errorCodes.js");
+const { getImage } = require('./database.js');
 
-const args = JSON.parse(process.argv.slice(2));
+const data = JSON.parse(process.argv.slice(2)[0]);
 
 async function output(json) {
     process.stdout.write(JSON.stringify(JSON.stringify(json)));
@@ -10,14 +11,16 @@ async function output(json) {
 }
 
 (async () => {
+	
 	try {
-		let id = null;
 
-		await output({ status: StatusCodes.running });
+		let id = null;
 
 		await output({ message: `I have an id of: ${id}` });
 
-		await output({message: args})
+		await output({ status: StatusCodes.running });
+
+		await output({message: data})
 
 		/*
 		const { Image } = require("image-js");
@@ -50,7 +53,7 @@ async function output(json) {
 
 		await output({ status: StatusCodes.done });
 	} catch (err) {
-		output({ status: StatusCodes.error, erorr_code: ErrorCodes.unknown_error, error: err.toString() });
+		await output({ status: StatusCodes.error, erorr_code: ErrorCodes.unknown_error, error: err.toString() });
 		process.exit(ErrorCodes.unknown_error);
 	}
 })();
