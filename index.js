@@ -1,9 +1,9 @@
 const { parse, serialize } = require("cookie");
 const { v4: uuidv4 } = require("uuid");
-const { StatusCodes } = require("./statusCodes.js");
+const { StatusCodes } = require("./src/statusCodes.js");
 const fs = require("fs");
 
-const { addImage, updateImage, getImage, addWebsocket, getUser, addUser, getWebsocket } = require("./database.js");
+const { addImage, updateImage, getImage, addWebsocket, getUser, addUser, getWebsocket } = require("./src/database.js");
 
 let i = 0;
 
@@ -13,7 +13,7 @@ const server = Bun.serve({
 		const path = URL(req.url).pathname.toLowerCase();
 
 		if (path === "/") {
-			return new Response(Bun.file("index.html"), { status: 200 });
+			return new Response(Bun.file("public/index.html"), { status: 200 });
 		}
 
 		if (path === "/ws") {
@@ -46,8 +46,11 @@ const server = Bun.serve({
 			const photo = formdata.get("profilePicture");
 			if (!photo) throw new Error("Must upload a profile picture.");
 
-			const folderPath = `./images/${imageID}`;
+            const dir = __dirname;
+			const folderPath = `${dir}/images/${imageID}`;
 			const filePah = `/original.png`;
+
+            console.log(`${folderPath}${filePah}`)
 
 			if (!fs.existsSync(folderPath)) {
 				fs.mkdirSync(folderPath);
@@ -82,7 +85,7 @@ const server = Bun.serve({
 
 			if (image === null) return new Response(`Unknown image id!`, { status: 404 });
 
-			return new Response(Bun.file("image.html"), { status: 200 });
+			return new Response(Bun.file("public/image.html"), { status: 200 });
 		}
 
 		if (path === "/view") {
@@ -119,7 +122,7 @@ const server = Bun.serve({
 				id: imageID,
 			};
 
-			const proc = Bun.spawn(["bun", "background.js", JSON.stringify(CHILD_DATA)], {
+			const proc = Bun.spawn(["bun", "src/imageMaker.js", JSON.stringify(CHILD_DATA)], {
 				async onExit(proc, exitCode, signalCode, error) {
 					const websocket = await getWebsocket({ id: CHILD_DATA.socket_id });
 

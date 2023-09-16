@@ -2,7 +2,7 @@ import { Database } from "bun:sqlite";
 
 const websockets = new Map(); // Websockets stored in memory (So I can store them as objects)
 
-const file = "db/mydb.sqlite";
+const file = `db/minecraft_web_database.sqlite`;
 
 init();
 

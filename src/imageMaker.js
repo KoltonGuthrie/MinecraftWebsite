@@ -34,6 +34,7 @@ function rgbToHex(r, g, b) {
 	try {
 		const imageData = await getImage({ id: data.id });
 
+		
 		if (imageData.status !== StatusCodes.starting) { // Has already started
 			let img = await getImage({ id: data.id });
 
@@ -48,17 +49,18 @@ function rgbToHex(r, g, b) {
 			await output({ status: img.status});
 			return;
 		}
+		
 
 		await updateImage({ id: imageData.id, key: "status", value: StatusCodes.running });
 		await output({ status: StatusCodes.running });
 
-		const { Image } = require("image-js");
+		
 
-		let colors = await Bun.file(`savedBlocks.json`).json();
+		const { Image } = require("image-js");
+		let colors = await Bun.file(`src/savedBlocks.json`).json();
 
 		let nearestColor = require("nearest-color").from(colors);
 
-		
 		let mainImage = await Image.load(imageData.original_file); // read image
 
 		const MAX_BLOCKS = 100_000;
@@ -77,7 +79,7 @@ function rgbToHex(r, g, b) {
 
 		for (i = 0; Object.keys(colors).length > i; i++) {
 			const key = Object.keys(colors)[i];
-			let mc = await Image.load(`texturepack/assets/minecraft/textures/block/${key}`);
+			let mc = await Image.load(`./texturepack/assets/minecraft/textures/block/${key}`);
 			cachedPhotos.set(key, mc);
 		}
 
@@ -154,6 +156,8 @@ function rgbToHex(r, g, b) {
 
 		const folderPath = `./images/${imageData.id}`;
         const filePah = `/minecraft_image.png`;
+
+		await output({ message: `${folderPath}${filePah}` })
 
         if (!fs.existsSync(folderPath)) {
             fs.mkdirSync(folderPath);
