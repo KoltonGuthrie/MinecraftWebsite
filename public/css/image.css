@@ -1,0 +1,29 @@
+* {
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    top: 0;
+    right: 0;
+}
+
+.image-main {
+    width: 100%;
+    height: 100%;
+}
+
+.image-container {
+    width: 50%;
+}
+
+#mc-image {
+    /* image-rendering: pixelated; */
+    width: -webkit-fill-available; 
+    width: -moz-available;
+    cursor: zoom-in;
+}
+
+.viewer-canvas > img {
+    image-rendering: pixelated;
+}

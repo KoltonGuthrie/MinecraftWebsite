@@ -1,36 +1,74 @@
-<p>Websocket connected: <span id="ws_connected"></span></p>
-<h3>Messages:</h3>
-<div id="messages"></div>
-<script>
-	const StatusCodes = {
-	    starting: 0,
-	    running: 1,
-	    done: 2,
-	    error: 3
-	}
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<link rel="stylesheet" href="css/image.css" />
+		<link rel="stylesheet" href="css/viewer.min.css">
+		<title>Minecraft Image</title>
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+		<script src="javascript/viewer.min.js"></script>
+	</head>
+	<body>
+		<p>Websocket connected: <span id="ws_connected"></span></p>
+		<div class="image-main">
+			<div class="image-container">
+				<img id="mc-image" />
+			</div>
+		</div>
+		<script>
+			const StatusCodes = {
+				starting: 0,
+				running: 1,
+				done: 2,
+				error: 3,
+			};
 
-	const imageID = new URL(document.URL).searchParams.get('id');
-	const socket = new WebSocket(`ws://localhost:8888/ws?id=${imageID}`)
+			const imageID = new URL(document.URL).searchParams.get("id");
+			const socket = new WebSocket(`ws://${document.location.host}/ws?id=${imageID}`);
 
-	socket.addEventListener("message", e => {
-	    const msg = JSON.parse(e.data);
+			socket.addEventListener("message", (e) => {
+				const msg = JSON.parse(e.data);
+				console.log(msg);
 
-	    if(msg?.status === StatusCodes.done) {
-            const img = document.createElement('img');
-            img.src = `http://localhost:8888/view?id=${imageID}`;      
-            document.querySelector('#messages').appendChild(img);
-            return;
-        }
+				if (msg?.status === StatusCodes.done) {
+					$("#mc-image").attr("src", `http://${document.location.host}/view?id=${imageID}`);
+					const viewer = new Viewer(document.querySelector('#mc-image'), {
+						
+						button: false,
+						navbar: false,
+						toolbar: {
+							zoomIn: true,
+							zoomOut: true,
+							oneToOne: true,
+							reset: true,
+							prev: false,
+							play: {
+							show: false,
+							size: 'large',
+							},
+							next: false,
+							rotateLeft: false,
+							rotateRight: false,
+							flipHorizontal: false,
+							flipVertical: false,
+						},
+						movable: true,
+						title: false,
+						zoomRatio: 0.3,
+						minZoomRatio: 0.05,
 
-	    const p = document.createElement('p');
-	    p.innerText = JSON.stringify(msg);
-	    document.querySelector('#messages').appendChild(p)
-	});
+					});
+					return;
+				}
+			});
 
-	socket.addEventListener("error", e => {
-	    console.error(e);
-	})
+			socket.addEventListener("error", (e) => {
+				console.error(e);
+			});
 
-	socket.addEventListener('open', e => document.querySelector('#ws_connected').innerText = "true");
-	socket.addEventListener('close', e => document.querySelector('#ws_connected').innerText = "false");
-</script>
+			socket.addEventListener("open", (e) => (document.querySelector("#ws_connected").innerText = "true"));
+			socket.addEventListener("close", (e) => (document.querySelector("#ws_connected").innerText = "false"));
+		</script>
+	</body>
+</html>

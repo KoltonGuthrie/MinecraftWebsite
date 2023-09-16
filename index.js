@@ -5,9 +5,10 @@ const fs = require("fs");
 
 const { addImage, updateImage, getImage, addWebsocket, getUser, addUser, getWebsocket } = require("./src/database.js");
 
-let i = 0;
+const BASE_PATH = "./public";
 
 const server = Bun.serve({
+    development: true,
 	port: 8888,
 	async fetch(req, res) {
 		const path = URL(req.url).pathname.toLowerCase();
@@ -43,8 +44,8 @@ const server = Bun.serve({
 
 			const formdata = await req.formData();
 			const name = formdata.get("name");
-			const photo = formdata.get("profilePicture");
-			if (!photo) throw new Error("Must upload a profile picture.");
+			const photo = formdata.get("image");
+			if (!photo) throw new Error("Must upload an image.");
 
             const dir = __dirname;
 			const folderPath = `${dir}/images/${imageID}`;
@@ -98,6 +99,12 @@ const server = Bun.serve({
 
 			return new Response(Bun.file(image.minecraft_file), { status: 200 });
 		}
+
+        const filePath = BASE_PATH + new URL(req.url).pathname;
+        console.log(filePath);
+        if(fs.existsSync(filePath)) {
+            return new Response(Bun.file(filePath));
+        }
 
 		return new Response(`${path} is an unknown page!`, { status: 404 });
 	},
