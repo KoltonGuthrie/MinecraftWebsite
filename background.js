@@ -1,6 +1,6 @@
 const { StatusCodes } = require("./statusCodes.js");
 const { ErrorCodes } = require("./errorCodes.js");
-const { getImage } = require('./database.js');
+const { getImage, updateImage } = require('./database.js');
 
 const data = JSON.parse(process.argv.slice(2)[0]);
 
@@ -19,10 +19,11 @@ async function output(json) {
 		await output({ message: `My data: ${JSON.stringify(imageData)}` }); // Debug
 
 		if(imageData.status !== StatusCodes.starting) { // Has already started/finished
-			let img = await getImage(data.id);
+			let img = await getImage({id: data.id});
+			await output({ status: img.status});
 			while(img.status === StatusCodes.running) { // If running
 				await Bun.sleep(5000); // Sleep for 5 seconds
-				img = await getImage(data.id);
+				img = await getImage({id: data.id});
 
 				await output({ status: img.status});
 			}
@@ -30,9 +31,10 @@ async function output(json) {
 			return;
 		}
 
+		await updateImage({id: imageData.id, key: 'status', value: StatusCodes.running});
 		await output({ status: StatusCodes.running });
 
-		await Bun.sleep(10000);
+		await Bun.sleep(20000);
 
 		await output({message: data})
 
@@ -64,7 +66,7 @@ async function output(json) {
 
 
 
-
+		await updateImage({id: imageData.id, key: 'status', value: StatusCodes.done});
 		await output({ status: StatusCodes.done });
 	} catch (err) {
 		await output({ status: StatusCodes.error, erorr_code: ErrorCodes.unknown_error, error: err.toString() });
