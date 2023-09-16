@@ -54,9 +54,9 @@ export async function updateImage({ id = "%", key, value }) {
     return await getImage({ id });
 }
 
-export async function addImage({id, websocketID = 'null', userID, original_file = 'null', minecraft_file = 'null', created, status}) {
+export async function addImage({id, userID, original_file = 'null', minecraft_file = 'null', created, status}) {
 	const db = await connect();
-    const query = await db.prepare(`INSERT INTO images(id, user_id, original_file, minecraft_file, created, status) VALUES(?,?,?,?,?,?,?);`,[id, userID, original_file, minecraft_file, created, status]);
+    const query = await db.prepare(`INSERT INTO images(id, user_id, original_file, minecraft_file, created, status) VALUES(?,?,?,?,?,?);`,[id, userID, original_file, minecraft_file, created, status]);
 	await query.run();
 	await db.close();
 	return await getImage({ id });
@@ -64,7 +64,7 @@ export async function addImage({id, websocketID = 'null', userID, original_file 
 
 export async function getImage({ id = "%"}) {
 	const db = await connect();
-    const query = await db.prepare(`SELECT * FROM images WHERE id LIKE ?;`,[id, websocketID]);
+    const query = await db.prepare(`SELECT * FROM images WHERE id LIKE ?;`,[id]);
 	const result = await query.get();
 	await db.close();
 	return result;
