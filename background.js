@@ -151,6 +151,7 @@ function rgbToHex(r, g, b) {
         }
 
 		await mcImage.save(`${folderPath}${filePah}`);
+		await updateImage({ id: imageData.id, key: "minecraft_file", value: `${folderPath}${filePah}` });
 
 		await updateImage({ id: imageData.id, key: "status", value: StatusCodes.done });
 		await output({ status: StatusCodes.done });
