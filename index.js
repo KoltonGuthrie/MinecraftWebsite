@@ -79,6 +79,17 @@ const server = Bun.serve({
             return new Response(Bun.file('image.html'), {status: 200});
         }
 
+        if(path === '/view') {
+            const imageID = URL(req.url).searchParams.get('id') || null;
+            const image = await getImage({id: imageID});
+
+            if(image === null) return new Response(`Unknown image id!`, {status: 404});
+            if(image.status !== StatusCodes.done) return new Response(`Not done creating image!`, {status: 404});
+            if(image.minecraft_image === undefined) return new Response(`There is no finished image!`, {status: 404});
+
+            return new Response(Bun.file(image.minecraft_image), {status: 200});
+        }
+
         return new Response(`${path} is an unknown page!`, {status: 404});
     },
     websocket: {
