@@ -96,6 +96,7 @@ const server = Bun.serve({
             }
 
             const socket = await addWebsocket({ id: websocketID, userID: user.id, imageID, ws});
+            await updateImage({id: imageID, key: 'websocket_id', value: socket.id}); // Add socket to image in database
 
             const CHILD_DATA = {
                 id: imageID,
