@@ -96,7 +96,6 @@ const server = Bun.serve({
             }
 
             const socket = await addWebsocket({ id: websocketID, userID: user.id, imageID, ws});
-            await updateImage({id: imageID, key: 'websocket_id', value: socket.id}); // Add socket to image in database
 
             const CHILD_DATA = {
                 socket_id: socket.id,
@@ -125,10 +124,6 @@ const server = Bun.serve({
                 const websocket = await getWebsocket({id: socket.id});
 
                 const json = JSON.parse(JSON.parse(new TextDecoder().decode(chunk)));
-
-                if(Object.keys(StatusCodes)[json?.status] !== undefined) {
-                    const r = await updateImage({websocketID: socket.id, key: 'status', value: json?.status});
-                }
 
                 websocket.send(JSON.stringify(json));
 

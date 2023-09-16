@@ -35,7 +35,6 @@ async function init() {
 		`CREATE TABLE IF NOT EXISTS 'images'
             (
             'id' STRING NOT NULL,
-            'websocket_id' STRING NOT NULL,
             'user_id' STRING NOT NULL,
 			'original_file' STRING NOT NULL,
             'minecraft_file' STRING NOT NULL,
@@ -46,26 +45,26 @@ async function init() {
 	await db.close();
 }
 
-export async function updateImage({ id = "%", websocketID = "%", key, value }) {
+export async function updateImage({ id = "%", key, value }) {
     if(!key || !value) return null;
 	const db = await connect();
-    const query = await db.prepare(`UPDATE images SET ${key} = ? WHERE id LIKE ? AND websocket_id LIKE ?;`,[value, id, websocketID]);
+    const query = await db.prepare(`UPDATE images SET ${key} = ? WHERE id LIKE ?;`,[value, id]);
 	await query.run();
 	await db.close();
-    return await getImage({ id, websocketID });
+    return await getImage({ id });
 }
 
 export async function addImage({id, websocketID = 'null', userID, original_file = 'null', minecraft_file = 'null', created, status}) {
 	const db = await connect();
-    const query = await db.prepare(`INSERT INTO images(id, websocket_id, user_id, original_file, minecraft_file, created, status) VALUES(?,?,?,?,?,?,?);`,[id, websocketID, userID, original_file, minecraft_file, created, status]);
+    const query = await db.prepare(`INSERT INTO images(id, user_id, original_file, minecraft_file, created, status) VALUES(?,?,?,?,?,?,?);`,[id, userID, original_file, minecraft_file, created, status]);
 	await query.run();
 	await db.close();
-	return await getImage({ id, websocketID });
+	return await getImage({ id });
 }
 
-export async function getImage({ id = "%", websocketID = "%" }) {
+export async function getImage({ id = "%"}) {
 	const db = await connect();
-    const query = await db.prepare(`SELECT * FROM images WHERE id LIKE ? AND websocket_id LIKE ?;`,[id, websocketID]);
+    const query = await db.prepare(`SELECT * FROM images WHERE id LIKE ?;`,[id, websocketID]);
 	const result = await query.get();
 	await db.close();
 	return result;
