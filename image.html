@@ -1,22 +1,36 @@
-
 <p>Websocket connected: <span id="ws_connected"></span></p>
 <h3>Messages:</h3>
 <div id="messages"></div>
 <script>
-    const imageID = new URL(document.URL).searchParams.get('id');
-    const socket = new WebSocket(`ws://localhost:8888/ws?id=${imageID}`)
+	const StatusCodes = {
+	    starting: 0,
+	    running: 1,
+	    done: 2,
+	    error: 3
+	}
 
-    socket.addEventListener("message", e => {
-        const msg = JSON.parse(e.data);
-        const p = document.createElement('p');
-        p.innerText = JSON.stringify(msg);
-        document.querySelector('#messages').appendChild(p)
-    });
+	const imageID = new URL(document.URL).searchParams.get('id');
+	const socket = new WebSocket(`ws://localhost:8888/ws?id=${imageID}`)
 
-    socket.addEventListener("error", e => {
-        console.error(e);
-    })
+	socket.addEventListener("message", e => {
+	    const msg = JSON.parse(e.data);
 
-    socket.addEventListener('open', e => document.querySelector('#ws_connected').innerText = "true");
-    socket.addEventListener('close', e => document.querySelector('#ws_connected').innerText = "false");
+	    if(msg?.status === StatusCodes.done) {
+            const img = document.createElement('img');
+            img.src = `http://localhost:8888/view?id=${imageID}`;      
+            document.querySelector('#messages').appendChild(img);
+            return;
+        }
+
+	    const p = document.createElement('p');
+	    p.innerText = JSON.stringify(msg);
+	    document.querySelector('#messages').appendChild(p)
+	});
+
+	socket.addEventListener("error", e => {
+	    console.error(e);
+	})
+
+	socket.addEventListener('open', e => document.querySelector('#ws_connected').innerText = "true");
+	socket.addEventListener('close', e => document.querySelector('#ws_connected').innerText = "false");
 </script>
