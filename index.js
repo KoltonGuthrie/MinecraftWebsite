@@ -13,7 +13,7 @@ const server = Bun.serve({
 		const path = URL(req.url).pathname.toLowerCase();
 
 		if (path === "/") {
-			return new Response(Bun.file("public/index.html"), { status: 200 });
+			return new Response(Bun.file("public/home.html"), { status: 200 });
 		}
 
 		if (path === "/ws") {
