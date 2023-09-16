@@ -2,8 +2,16 @@ const { parse, serialize } = require("cookie");
 const { v4: uuidv4 } = require("uuid");
 const { StatusCodes } = require("./src/statusCodes.js");
 const fs = require("fs");
+const { RateLimiterMemory } = require("rate-limiter-flexible");
 
 const { addImage, updateImage, getImage, addWebsocket, getUser, addUser, getWebsocket } = require("./src/database.js");
+
+const opts = {
+	points: 100, // 100 points
+	duration: 1 * 60, // Per min
+	};
+
+const rateLimiter = new RateLimiterMemory(opts);
 
 const BASE_PATH = "./public";
 
@@ -12,18 +20,41 @@ const server = Bun.serve({
 	port: 8888,
 	async fetch(req, res) {
 		const path = URL(req.url).pathname.toLowerCase();
+ 
+		// All request will receive a token cookie if it does not exist
+		const cookies = parse(req.headers.get("cookie") || "");
+
+		if (cookies.token === undefined) {
+			cookies.token = uuidv4();
+		}
 
 		if (path === "/") {
-			return new Response(Bun.file("public/home.html"), { status: 200 });
+			const rateLimiterRes = await checkRateLimit(cookies.token, 1);
+			if(rateLimiterRes === null) return new Response("Internal Server Error", { status: 500 });
+
+			const headers = {
+				"Retry-After": rateLimiterRes.msBeforeNext / 1000,
+				"X-RateLimit-Remaining": rateLimiterRes.remainingPoints,
+				"X-RateLimit-Reset": new Date(Date.now() + rateLimiterRes.msBeforeNext)
+			}
+
+			if(rateLimiterRes.remainingPoints <= 0) return new Response("Too Many Requests!", { status: 429 , headers }); 
+			return new Response(Bun.file("public/home.html"), { status: 200, headers });
 		}
 
 		if (path === "/ws") {
-			const cookies = parse(req.headers.get("cookie") || "");
 			let token = cookies.token;
 
-			if (token === undefined) {
-				cookies.token = uuidv4();
+			const rateLimiterRes = await checkRateLimit(token, 1);
+			if(rateLimiterRes === null) return new Response("Internal Server Error", { status: 500 });
+
+			const headers = {
+				"Retry-After": rateLimiterRes.msBeforeNext / 1000,
+				"X-RateLimit-Remaining": rateLimiterRes.remainingPoints,
+				"X-RateLimit-Reset": new Date(Date.now() + rateLimiterRes.msBeforeNext)
 			}
+
+			if(rateLimiterRes.remainingPoints <= 0) return new Response("Too Many Requests!", { status: 429 , headers }); 
 
 			let str = "";
 			for (k in cookies) {
@@ -35,11 +66,24 @@ const server = Bun.serve({
 
 			const imageID = URL(req.url).searchParams.get("id") || null;
 
-			const success = server.upgrade(req, { data: { token, imageID }, headers: { "Set-Cookie": str } });
+			headers["Set-Cookie"] = str;
+ 
+			const success = server.upgrade(req, { data: { token, imageID }, headers });
 			return success ? undefined : new Response("WebSocket upgrade error", { status: 400 });
 		}
 
 		if (path === "/upload") {
+			const rateLimiterRes = await checkRateLimit(cookies.token, 5);
+			if(rateLimiterRes === null) return new Response("Internal Server Error", { status: 500 });
+
+			const headers = {
+				"Retry-After": rateLimiterRes.msBeforeNext / 1000,
+				"X-RateLimit-Remaining": rateLimiterRes.remainingPoints,
+				"X-RateLimit-Reset": new Date(Date.now() + rateLimiterRes.msBeforeNext)
+			}
+
+			if(rateLimiterRes.remainingPoints <= 0) return new Response("Too Many Requests!", { status: 429 , headers }); 
+
 			const imageID = uuidv4();
 
 			const formdata = await req.formData();
@@ -59,7 +103,6 @@ const server = Bun.serve({
 
 			await Bun.write(`${folderPath}${filePah}`, photo);
 
-			const cookies = parse(req.headers.get("cookie") || "");
 			let token = cookies.token;
 
 			let user = await getUser({ token });
@@ -77,27 +120,49 @@ const server = Bun.serve({
 				status: StatusCodes.starting,
 			});
 
-			return Response.redirect(`/image?id=${imageID}`);
+			return Response.redirect(`/image?id=${imageID}`, { headers });
 		}
 
 		if (path === "/image") {
+			const rateLimiterRes = await checkRateLimit(cookies.token, 2);
+			if(rateLimiterRes === null) return new Response("Internal Server Error", { status: 500 });
+
+			const headers = {
+				"Retry-After": rateLimiterRes.msBeforeNext / 1000,
+				"X-RateLimit-Remaining": rateLimiterRes.remainingPoints,
+				"X-RateLimit-Reset": new Date(Date.now() + rateLimiterRes.msBeforeNext)
+			}
+
+			if(rateLimiterRes.remainingPoints <= 0) return new Response("Too Many Requests!", { status: 429 , headers }); 
+
 			const imageID = URL(req.url).searchParams.get("id") || null;
 			const image = await getImage({ id: imageID });
 
-			if (image === null) return new Response(`Unknown image id!`, { status: 404 });
+			if (image === null) return new Response(`Unknown image id!`, { status: 404, headers });
 
-			return new Response(Bun.file("public/image.html"), { status: 200 });
+			return new Response(Bun.file("public/image.html"), { status: 200, headers });
 		}
 
 		if (path === "/view") {
+			const rateLimiterRes = await checkRateLimit(cookies.token, 2);
+			if(rateLimiterRes === null) return new Response("Internal Server Error", { status: 500 });
+
+			const headers = {
+				"Retry-After": rateLimiterRes.msBeforeNext / 1000,
+				"X-RateLimit-Remaining": rateLimiterRes.remainingPoints,
+				"X-RateLimit-Reset": new Date(Date.now() + rateLimiterRes.msBeforeNext)
+			}
+
+			if(rateLimiterRes.remainingPoints <= 0) return new Response("Too Many Requests!", { status: 429 , headers }); 
+
 			const imageID = URL(req.url).searchParams.get("id") || null;
 			const image = await getImage({ id: imageID });
 
-			if (image === null) return new Response(`Unknown image id!`, { status: 404 });
-			if (image.status !== StatusCodes.done) return new Response(`Not done creating image!`, { status: 404 });
-			if (image.minecraft_file === undefined) return new Response(`There is no finished image!`, { status: 404 });
+			if (image === null) return new Response(`Unknown image id!`, { status: 404, headers });
+			if (image.status !== StatusCodes.done) return new Response(`Not done creating image!`, { status: 404, headers });
+			if (image.minecraft_file === undefined) return new Response(`There is no finished image!`, { status: 404, headers });
 
-			return new Response(Bun.file(image.minecraft_file), { status: 200 });
+			return new Response(Bun.file(image.minecraft_file), { status: 200, headers });
 		}
 
         const filePath = BASE_PATH + new URL(req.url).pathname;
@@ -106,7 +171,7 @@ const server = Bun.serve({
             return new Response(Bun.file(filePath));
         }
 
-		return new Response(`${path} is an unknown page!`, { status: 404 });
+		return new Response(`${path} is an unknown page!`, { status: 404, headers });
 	},
 	websocket: {
 		idleTimeout: 60,
@@ -165,5 +230,18 @@ const server = Bun.serve({
 		close(ws) {},
 	},
 });
+
+async function checkRateLimit(token, amount) {
+	if(token === undefined || amount === undefined) return null;;
+	let rateLimiterRes = null;
+
+	try {
+		rateLimiterRes = await rateLimiter.consume(token, amount);
+	} catch(rate) {
+		rateLimiterRes = rate;
+	}
+
+	return rateLimiterRes;
+}
 
 console.log(`Listening on localhost:${server.port}`);
