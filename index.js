@@ -115,6 +115,7 @@ const server = Bun.serve({
 			await addImage({
 				id: imageID,
 				userID: user.id,
+				original_file_name: photo.name,
 				original_file: `${folderPath}${filePah}`,
 				created: new Date().getTime(),
 				status: StatusCodes.starting,
@@ -162,6 +163,9 @@ const server = Bun.serve({
 			if (image.status !== StatusCodes.done) return new Response(`Not done creating image!`, { status: 404, headers });
 			if (image.minecraft_file === undefined) return new Response(`There is no finished image!`, { status: 404, headers });
 
+			headers['Content-Type'] = 'image/png';
+			headers['Content-Disposition'] = `attachment; filename="${image.original_file_name || image.id}"`
+			
 			return new Response(Bun.file(image.minecraft_file), { status: 200, headers });
 		}
 

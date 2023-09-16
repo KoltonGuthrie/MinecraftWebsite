@@ -36,6 +36,7 @@ async function init() {
             (
             'id' STRING NOT NULL,
             'user_id' STRING NOT NULL,
+			'original_file_name' STRING,
 			'original_file' STRING NOT NULL,
             'minecraft_file' STRING NOT NULL,
             'created' STRING NOT NULL,
@@ -54,9 +55,9 @@ export async function updateImage({ id = "%", key, value }) {
     return await getImage({ id });
 }
 
-export async function addImage({id, userID, original_file = 'null', minecraft_file = 'null', created, status}) {
+export async function addImage({id, userID, original_file_name, original_file = 'null', minecraft_file = 'null', created, status}) {
 	const db = await connect();
-    const query = await db.prepare(`INSERT INTO images(id, user_id, original_file, minecraft_file, created, status) VALUES(?,?,?,?,?,?);`,[id, userID, original_file, minecraft_file, created, status]);
+    const query = await db.prepare(`INSERT INTO images(id, user_id, original_file_name, original_file, minecraft_file, created, status) VALUES(?,?,?,?,?,?,?);`,[id, userID, original_file_name, original_file, minecraft_file, created, status]);
 	await query.run();
 	await db.close();
 	return await getImage({ id });
