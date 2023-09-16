@@ -14,7 +14,7 @@ async function output(json) {
 	
 	try {
 
-		const imageData = await getImage(data.id);
+		const imageData = await getImage({id: data.id});
 
 		await output({ message: `My data: ${JSON.stringify(imageData)}` }); // Debug
 

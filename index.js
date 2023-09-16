@@ -99,17 +99,18 @@ const server = Bun.serve({
             await updateImage({id: imageID, key: 'websocket_id', value: socket.id}); // Add socket to image in database
 
             const CHILD_DATA = {
+                socket_id: socket.id,
                 id: imageID,
             }
 
             const proc = Bun.spawn(["bun", "background.js", JSON.stringify(CHILD_DATA)], {
                 async onExit(proc, exitCode, signalCode, error) {
-                    const websocket = await getWebsocket({id: socket.id});
+                    const websocket = await getWebsocket({id: CHILD_DATA.socket_id});
 
                     if(exitCode > 0) {
                         // ERROR
                         console.log(`Process ${proc.id} ended with exitCode: ${exitCode}, signalCode: ${signalCode}, and error: ${error || null}`);
-                        await updateImage({websocketID: socket.id, key: 'status', value: StatusCodes.error});
+                        await updateImage({id: CHILD_DATA.id, key: 'status', value: StatusCodes.error});
                         const msg = {message: "There was an internal error", errorData: error, status: StatusCodes.error}
                         return websocket.send(JSON.stringify(msg));
                     } 
@@ -119,6 +120,7 @@ const server = Bun.serve({
                 },
             });
 
+            // Data taken from the process
             for await (const chunk of proc.stdout) {
                 const websocket = await getWebsocket({id: socket.id});
 
@@ -126,7 +128,6 @@ const server = Bun.serve({
 
                 if(Object.keys(StatusCodes)[json?.status] !== undefined) {
                     const r = await updateImage({websocketID: socket.id, key: 'status', value: json?.status});
-                    console.log(r);
                 }
 
                 websocket.send(JSON.stringify(json));
