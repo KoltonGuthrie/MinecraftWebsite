@@ -34,7 +34,6 @@ function rgbToHex(r, g, b) {
 	try {
 		const imageData = await getImage({ id: data.id });
 
-		
 		if (imageData.status !== StatusCodes.starting) { // Has already started
 			let img = await getImage({ id: data.id });
 
@@ -49,16 +48,13 @@ function rgbToHex(r, g, b) {
 			await output({ status: img.status});
 			return;
 		}
-		
 
 		await updateImage({ id: imageData.id, key: "status", value: StatusCodes.running });
 		await output({ status: StatusCodes.running });
 
-		
-
 		const { Image } = require("image-js");
-		let colors = await Bun.file(`src/savedBlocks.json`).json();
 
+		let colors = await Bun.file(`src/savedBlocks.json`).json();
 		let nearestColor = require("nearest-color").from(colors);
 
 		let mainImage = await Image.load(imageData.original_file); // read image
@@ -78,37 +74,50 @@ function rgbToHex(r, g, b) {
 		const minecraftBlockSize = 16;
 
 		for (i = 0; Object.keys(colors).length > i; i++) {
+
 			const key = Object.keys(colors)[i];
 			let mc = await Image.load(`./texturepack/assets/minecraft/textures/block/${key}`);
+
 			cachedPhotos.set(key, mc);
+
 		}
 
 		if (mainImage.width - (mainImage.width % blockSize) > blockSize) {
 			if (mainImage.height - (mainImage.height % blockSize) > blockSize) {
 				if (mainImage.width % blockSize !== 0) {
+
 					mainImage = mainImage.resize({
 						width: mainImage.width - (mainImage.width % blockSize),
 						height: mainImage.height,
 						preserveAspectRatio: false,
 					});
+
 				}
 
 				if (mainImage.height % blockSize !== 0) {
+
 					mainImage = mainImage.resize({
 						width: mainImage.width,
 						height: mainImage.height - (mainImage.height % blockSize),
 						preserveAspectRatio: false,
 					});
+
 				}
 			} else {
+
 				const error = ErrorCodes.image_too_small;
+
 				await output({ status: StatusCodes.error, erorr_code: error, message: "Image is too small" });
 				process.exit(0);
+
 			}
 		} else {
+
 			const error = ErrorCodes.image_too_small;
+
 			await output({ status: StatusCodes.error, erorr_code: error, message: "Image is too small" });
 			process.exit(0);
+
 		}
 
 		let mcImage = new Image(
@@ -129,10 +138,13 @@ function rgbToHex(r, g, b) {
 					.crop({ x: blockSize * w, y: blockSize * h, width: blockSize, height: blockSize })
 					.colorDepth(8)
 					.getHistograms({ maxSlots: mainImage.maxValue + 1 });
+
 				let result = new Array(histograms.length);
 				for (let c = 0; c < histograms.length; c++) {
+
 					let histogram = histograms[c];
 					result[c] = Math.floor(mean(histogram));
+
 				}
 
 				try {
@@ -146,9 +158,12 @@ function rgbToHex(r, g, b) {
 					});
 
 				} catch (e) {
+
 					const error = ErrorCodes.image_insert_failed;
+
 					await output({ status: StatusCodes.error, erorr_code: error, message: "Failed to add an image block into the final output" });
 					process.exit(0);
+
 				}
 
 			}
@@ -168,8 +183,13 @@ function rgbToHex(r, g, b) {
 
 		await updateImage({ id: imageData.id, key: "status", value: StatusCodes.done });
 		await output({ status: StatusCodes.done });
+
 	} catch (err) {
-		await output({ status: StatusCodes.error, erorr_code: ErrorCodes.unknown_error, info: err.toString() });
-		process.exit(ErrorCodes.unknown_error);
+
+		const error = ErrorCodes.unknown_error;
+
+		await output({ status: StatusCodes.error, erorr_code: error, info: err.toString() });
+		process.exit(error);
+
 	}
 })();
