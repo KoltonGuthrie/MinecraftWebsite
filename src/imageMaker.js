@@ -54,7 +54,18 @@ function rgbToHex(r, g, b) {
 
 		const { Image } = require("image-js");
 
-		let colors = await Bun.file(`src/savedBlocks.json`).json();
+		let blocks = await Bun.file(`src/savedBlocks.json`).json();
+
+		// Get all blocks for that mc version
+		const MC_VERSION = '1.19';
+		blocks = blocks[MC_VERSION];
+
+		// Convert to proper format to get nearestColor
+		const colors = {};
+		for (const key in blocks) {
+			colors[key] = blocks[key].color;
+		}
+
 		let nearestColor = require("nearest-color").from(colors);
 
 		let mainImage = await Image.load(imageData.original_file); // read image
@@ -74,9 +85,9 @@ function rgbToHex(r, g, b) {
 		const minecraftBlockSize = 16;
 
 		for (i = 0; Object.keys(colors).length > i; i++) {
-
 			const key = Object.keys(colors)[i];
-			let mc = await Image.load(`./texturepack/assets/minecraft/textures/block/${key}`);
+
+			let mc = await Image.load(`./versions/${MC_VERSION}/assets/minecraft/textures/block/${key}`);
 
 			cachedPhotos.set(key, mc);
 
