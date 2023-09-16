@@ -14,11 +14,25 @@ async function output(json) {
 	
 	try {
 
-		let id = null;
+		const imageData = await getImage(data.id);
 
-		await output({ message: `I have an id of: ${id}` });
+		await output({ message: `My data: ${JSON.stringify(imageData)}` }); // Debug
+
+		if(imageData.status !== StatusCodes.starting) { // Has already started/finished
+			let img = await getImage(data.id);
+			while(img.status === StatusCodes.running) { // If running
+				await Bun.sleep(5000); // Sleep for 5 seconds
+				img = await getImage(data.id);
+
+				await output({ status: img.status});
+			}
+			await output({ status: img.status, minecraft_file: img.minecraft_file });
+			return;
+		}
 
 		await output({ status: StatusCodes.running });
+
+		await Bun.sleep(10000);
 
 		await output({message: data})
 
