@@ -34,18 +34,18 @@ function rgbToHex(r, g, b) {
 	try {
 		const imageData = await getImage({ id: data.id });
 
-		if (imageData.status !== StatusCodes.starting) {
-			// Has already started/finished
+		if (imageData.status !== StatusCodes.starting) { // Has already started
 			let img = await getImage({ id: data.id });
-			await output({ status: img.status });
+
 			while (img.status === StatusCodes.running) {
 				// If running
 				await Bun.sleep(5000); // Sleep for 5 seconds
 				img = await getImage({ id: data.id });
+				await output({ status: img.status});
 
-				await output({ status: img.status });
 			}
-			await output({ status: img.status, minecraft_file: img.minecraft_file });
+
+			await output({ status: img.status});
 			return;
 		}
 
@@ -61,10 +61,18 @@ function rgbToHex(r, g, b) {
 		
 		let mainImage = await Image.load(imageData.original_file); // read image
 
-		await output({ message: `BlockSize: ${Math.min(mainImage.width*mainImage.height / 60244, 16)}` });
+		const MAX_BLOCKS = 100_000;
+
+		const totalPixels = mainImage.width*mainImage.height;
+		const blockSize = Math.sqrt(totalPixels / MAX_BLOCKS);
+		const totalBlocks = totalPixels / Math.pow(blockSize, 2);
+
+		await output({ message: `totalPixels: ${totalPixels}` });
+		await output({ message: `blockSize: ${blockSize}` });
+		await output({ message: `totalBlocks: ${totalBlocks}` });
+
 
 		let cachedPhotos = new Map();
-		const blockSize = 16; // Quality. Doesn't have to be 16 (This needs to be chosen by the user or the server)
 		const minecraftBlockSize = 16;
 
 		for (i = 0; Object.keys(colors).length > i; i++) {
