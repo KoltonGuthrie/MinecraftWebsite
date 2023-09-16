@@ -1,6 +1,7 @@
 const { parse, serialize } = require('cookie');
 const { v4: uuidv4 } = require('uuid');
 const { StatusCodes } = require('./statusCodes.js')
+const fs = require('fs');
 
 const { addImage, updateImage, getImage, addWebsocket, getUser, addUser, getWebsocket } = require('./database.js');
 
@@ -38,12 +39,21 @@ const server = Bun.serve({
         }
 
         if (path === '/upload') {
+            const imageID = uuidv4();
+
             const formdata = await req.formData();
             const name = formdata.get('name');
-            const profilePicture = formdata.get('profilePicture');
-            if (!profilePicture) throw new Error('Must upload a profile picture.');
-            // write profilePicture to disk
-            await Bun.write('profilePicture.png', profilePicture);
+            const photo = formdata.get('profilePicture');
+            if (!photo) throw new Error('Must upload a profile picture.');
+
+            const folderPath = `./images/${imageID}`;
+            const filePah = `/original.png`;
+
+            if (!fs.existsSync(folderPath)) {
+                fs.mkdirSync(folderPath);
+            }
+
+            await Bun.write(`${folderPath}${filePah}`, photo);
 
             const cookies = parse(req.headers.get("cookie") || "");
             let token = cookies.token;
@@ -55,8 +65,7 @@ const server = Bun.serve({
                 user = await addUser({id: userID, username: "john_doe", token: token});
             }
 
-            const imageID = uuidv4();
-            await addImage({id: imageID, userID: user.id, created: new Date().getTime(), status: StatusCodes.starting});
+            await addImage({id: imageID, userID: user.id, original_file: `${folderPath}${filePah}`, created: new Date().getTime(), status: StatusCodes.starting});
 
             return Response.redirect(`/image?id=${imageID}`);
         }
@@ -112,13 +121,14 @@ const server = Bun.serve({
             for await (const chunk of proc.stdout) {
                 const websocket = await getWebsocket({id: socket.id});
 
-                const json = JSON.parse(new TextDecoder().decode(chunk));
+                const json = JSON.parse(JSON.parse(new TextDecoder().decode(chunk)));
 
                 if(Object.keys(StatusCodes)[json?.status] !== undefined) {
-                    await updateImage({websocketID: socket.id, key: 'status', value: json?.status});
+                    const r = await updateImage({websocketID: socket.id, key: 'status', value: json?.status});
+                    console.log(r);
                 }
 
-                websocket.send(json);
+                websocket.send(JSON.stringify(json));
 
             }
 

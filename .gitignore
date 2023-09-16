@@ -3,3 +3,4 @@ node_modules
 texturepack
 image-maker.js
 profilePicture.png
+images/*
