@@ -107,7 +107,7 @@ const server = Bun.serve({
                     const websocket = await getWebsocket({id: CHILD_DATA.socket_id});
 
                     if(exitCode > 0) {
-                        // ERROR
+                        // Unhandled error
                         console.log(`Process ${proc.id} ended with exitCode: ${exitCode}, signalCode: ${signalCode}, and error: ${error || null}`);
                         await updateImage({id: CHILD_DATA.id, key: 'status', value: StatusCodes.error});
                         const msg = {message: "There was an internal error", errorData: error, status: StatusCodes.error}
