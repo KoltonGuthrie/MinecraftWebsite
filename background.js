@@ -7,7 +7,7 @@ const data = JSON.parse(process.argv.slice(2)[0]);
 
 async function output(json) {
 	process.stdout.write(JSON.stringify(JSON.stringify(json)));
-	await Bun.sleep(1); // Outputs were being sent at the same time
+	await Bun.sleep(1); // Stop outputs being sent at the same time
 	return;
 }
 
@@ -33,8 +33,6 @@ function rgbToHex(r, g, b) {
 (async () => {
 	try {
 		const imageData = await getImage({ id: data.id });
-
-		await output({ message: `My data: ${JSON.stringify(imageData)}` }); // Debug
 
 		if (imageData.status !== StatusCodes.starting) {
 			// Has already started/finished
@@ -91,12 +89,12 @@ function rgbToHex(r, g, b) {
 				}
 			} else {
 				const error = ErrorCodes.image_too_small;
-				await output({ status: StatusCodes.error, erorr_code: error, error: "Image is too small" });
+				await output({ status: StatusCodes.error, erorr_code: error, message: "Image is too small" });
 				process.exit(0);
 			}
 		} else {
 			const error = ErrorCodes.image_too_small;
-			await output({ status: StatusCodes.error, erorr_code: error, error: "Image is too small" });
+			await output({ status: StatusCodes.error, erorr_code: error, message: "Image is too small" });
 			process.exit(0);
 		}
 
@@ -136,7 +134,7 @@ function rgbToHex(r, g, b) {
 
 				} catch (e) {
 					const error = ErrorCodes.image_insert_failed;
-					await output({ status: StatusCodes.error, erorr_code: error, error: "Failed to add an image block into the final output" });
+					await output({ status: StatusCodes.error, erorr_code: error, message: "Failed to add an image block into the final output" });
 					process.exit(0);
 				}
 
@@ -156,7 +154,7 @@ function rgbToHex(r, g, b) {
 		await updateImage({ id: imageData.id, key: "status", value: StatusCodes.done });
 		await output({ status: StatusCodes.done });
 	} catch (err) {
-		await output({ status: StatusCodes.error, erorr_code: ErrorCodes.unknown_error, error: err.toString() });
+		await output({ status: StatusCodes.error, erorr_code: ErrorCodes.unknown_error, info: err.toString() });
 		process.exit(ErrorCodes.unknown_error);
 	}
 })();
