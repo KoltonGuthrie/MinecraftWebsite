@@ -58,6 +58,11 @@ function rgbToHex(r, g, b) {
 
 		let nearestColor = require("nearest-color").from(colors);
 
+		
+		let mainImage = await Image.load(imageData.original_file); // read image
+
+		await output({ message: `BlockSize: ${Math.min(mainImage.width*mainImage.height / 60244, 16)}` });
+
 		let cachedPhotos = new Map();
 		const blockSize = 16; // Quality. Doesn't have to be 16 (This needs to be chosen by the user or the server)
 		const minecraftBlockSize = 16;
@@ -67,8 +72,6 @@ function rgbToHex(r, g, b) {
 			let mc = await Image.load(`texturepack/assets/minecraft/textures/block/${key}`);
 			cachedPhotos.set(key, mc);
 		}
-
-		let mainImage = await Image.load(imageData.original_file); // read image
 
 		if (mainImage.width - (mainImage.width % blockSize) > blockSize) {
 			if (mainImage.height - (mainImage.height % blockSize) > blockSize) {
