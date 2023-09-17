@@ -87,8 +87,6 @@ const server = Bun.serve({
 			const folderPath = `${dir}/images/${imageID}`;
 			const filePah = `/original.png`;
 
-            console.log(`${folderPath}${filePah}`)
-
 			if (!fs.existsSync(folderPath)) {
 				fs.mkdirSync(folderPath);
 			}
