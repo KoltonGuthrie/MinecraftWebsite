@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="css/alertify.min.css" />
     <title>Minecraft Image Maker</title>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script src="javascript/home.js"></script>
     <script src="javascript/alertify.min.js"></script>
   </head>
   <body>
@@ -65,33 +66,5 @@
     <form id="upload-form" action="/upload" method="post" enctype="multipart/form-data">
       <input type="file" id="file" name="image" style="display: none;" />
     </form>
-
-    <script>
-      $(".hero").height(window.innerHeight);
-      $(window).resize(function() {
-        $(".hero").height(window.innerHeight);
-      });
-
-      $(document).ready(function() {
-        $(".file-upload").on("click", function() {
-          $("#upload-form input[type='file']").click();
-        });
-
-        $("#file").on("change", function(e) {
-          const file = $(this).prop("files")[0]?.["name"] || "";
-
-          $(".file-name").text(file);
-
-          if ($(this).val() !== "") {
-            $("#loading").removeClass("hide");
-            $("#upload-form").submit();
-          } else {
-              alertify.error('Please select a file');
-          }
-
-        });
-      });
-    </script>
-
   </body>
 </html>
