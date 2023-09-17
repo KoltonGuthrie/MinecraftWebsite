@@ -30,24 +30,18 @@ body {
 
 .loading-bar {
 	width: 480px;
-	height: 48px;
-}
+    height: 48px;
 
-.bottom-bar {
-	position: absolute;
-	width: inherit;
-	height: inherit;
-}
-
-#b-bar {
-	position: inherit;
-	width: 100%;
-	height: inherit;
-    background-color: rgb(49, 49, 49);
+    border-color: black;
+    border-width: 5px;
+    border-style: solid;
     border-radius: 50px;
+    overflow: hidden;
+    
+    background-color: #42429A;
 }
 
-.top-bar {
+.bar {
 	position: absolute;
 	width: inherit;
 	height: inherit;
@@ -55,11 +49,11 @@ body {
     overflow: hidden;
 }
 
-#t-bar {
+#bar {
 	position: inherit;
 	width: 50%;
 	height: inherit;
-    background-image: url("/image/loading-bar.jpg");
+    background-image: url("/image/loading-bar.png");
     background-repeat: no-repeat;
     background-size: cover;
 	image-rendering: pixelated;
