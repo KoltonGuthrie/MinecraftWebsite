@@ -16,8 +16,7 @@ const rateLimiter = new RateLimiterMemory(opts);
 const BASE_PATH = "./public";
 
 const server = Bun.serve({
-    development: true,
-	port: 8888,
+	port: process.env.PORT,
 	async fetch(req, res) {
 		const path = URL(req.url).pathname.toLowerCase();
  
