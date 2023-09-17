@@ -1,13 +1,93 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <meta charset="utf-8" />
-    <title>Form</title>
+    <meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<link rel="stylesheet" href="css/home.css" />
+    <link rel="stylesheet" href="css/alertify.min.css" />
+    <title>Minecraft Image Maker</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script src="javascript/alertify.min.js"></script>
   </head>
   <body>
-    <form action="/upload" method="post" enctype="multipart/form-data">
-      <input type="file" name="image" />
-      <input type="submit" value="Submit" />
+    <div class="hero row">
+      <div class="hero-content">
+        <div class="hero-text">
+          <h1>Minecraft Image Maker</h1>
+        </div>
+        <div class="hero-upload-btn">
+          <p class="file-name"></p>
+          <div class="hero-upload-btn-content file-upload">
+            <p class="hero-upload-btn-text">UPLOAD FILE</p>
+          </div>
+        </div>
+      </div>
+      <div class="hero-down-btn">
+        <a href="#what-is-this">
+          <img src="image/downarrow.svg">
+        </a>
+      </div>
+    </div>
+    <div class="what-is-this row" id="what-is-this">
+      <div class="wit-content row-content">
+        <h2>What is this?</h2>
+        <p>Convert any image into a Minecraft image!
+          Have you ever wanted to see what your photos would look like if they were made out of Minecraft blocks?
+          Well this website is for you! It will transform any photo into a photo made completely out of Minecraft blocks!
+          Supported image types: <span class="file-type">.jpg</span>, <span class="file-type">.jpeg</span>, and <span class="file-type">.png</span></p>
+      </div>
+    </div>
+    <div class="what-will-it-look-like row">
+      <div class="wwill-content row-content">
+        <div class="wwill-text">
+          <h2>What will it look like?</h2>
+          <p>This is an example photo of what this website can create within just a few seconds!</p>
+        </div>
+          <img id="small-mc-img" src="image/mc-image-small.png"/>
+      </div>
+    </div>
+    <div class="just-upload row">
+      <div class="ju-content row-content">
+        <h2>Just Upload!</h2>
+        <p>Just upload your files, wait a few seconds, and enjoy your new Minecraft image!</p>
+        <div class="ju-upload-btn">
+          <p class="file-name"></p>
+          <div class="ju-upload-btn-content file-upload">
+            <p class="ju-upload-btn-text">UPLOAD FILE</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <form id="upload-form" action="/upload" method="post" enctype="multipart/form-data">
+      <input type="file" id="file" name="image" style="display: none;" />
     </form>
+
+    <script>
+      $(".hero").height(window.innerHeight);
+      $(window).resize(function() {
+        $(".hero").height(window.innerHeight);
+      });
+
+      $(document).ready(function() {
+        $(".file-upload").on("click", function() {
+          $("#upload-form input[type='file']").click();
+        });
+
+        $("#file").on("change", function(e) {
+          const file = $(this).prop("files")[0]?.["name"] || "";
+
+          $(".file-name").text(file);
+
+          if ($(this).val() !== "") {
+            $("#upload-form").submit();
+          } else {
+              alertify.error('Please select a file');
+          }
+
+        });
+      });
+    </script>
+
   </body>
 </html>

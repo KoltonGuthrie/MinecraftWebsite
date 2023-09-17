@@ -1,0 +1,188 @@
+@import url('https://fonts.googleapis.com/css2?family=Quicksand&display=swap');
+
+@import url('https://fonts.googleapis.com/css2?family=Roboto&display=swap');
+
+html {
+    scroll-behavior: smooth;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    top: 0;
+    left: 0;
+}
+
+h1 {
+    font-family: 'Roboto', sans-serif;
+    font-size: 6em;
+}
+
+h2 {
+    font-family: 'Roboto', sans-serif;
+    font-size: 4em;
+}
+
+p {
+    line-height: 1.7em;
+    font-family: 'Quicksand', sans-serif;
+    font-size: 1.6em;
+}
+
+.row {
+    width: 100%;
+}
+
+.row-content {
+    width: 75%;
+    margin: auto auto;
+    padding: 50px 0;
+}
+
+.hero {
+    position: relative;
+
+    width: 100%;
+    height: 0px;
+
+    background-image: url("../image/hero.jpg");
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: 100% 100%;
+}
+
+.hero-content {
+    text-align: center;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.hero-text {
+    color: white;
+}
+
+.file-name {
+    font-family: 'Quicksand', sans-serif;
+    font-size: 1em;
+    color: #68d651;
+}
+
+.hero-upload-btn, .ju-upload-btn {
+    padding: 50px 0;
+}
+
+.hero-upload-btn-content {
+    cursor: pointer;
+    width: fit-content;
+    margin: auto auto;
+    padding: 8px 30px;
+    background-color: #68d651;
+    border-radius: 50px;
+    transition: background-color 250ms;
+}
+
+.hero-upload-btn-text {
+    font-family: 'Quicksand', sans-serif;
+    font-size: 1.2em;
+}
+
+.ju-upload-btn-content:hover, .hero-upload-btn-content:hover {
+    background-color: #4da13c;
+}
+
+.hero-down-btn {
+    position: absolute;
+    text-align: center;
+    bottom: 50px;
+    width: 100%;
+    margin: 0 0 10px 0;
+}
+
+.hero-down-btn img {
+    padding: 50px;
+    margin: -50px;
+    width: 50px;
+    height: 50px;
+    animation: downAndUp 2s ease-in-out infinite;
+}
+
+.wit-content > h2 {
+    text-align: center;
+    padding: 0 0 30px 0;
+}
+
+.wit-content > p {
+    text-align: center;
+    width: 65%;
+    max-width: 800px;
+    margin: auto auto;
+}
+
+.file-type {
+    color: #42429A;
+}
+
+.what-will-it-look-like {
+    background-color: #e5c2c2;
+}
+
+.wwill-content {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.wwill-text > p {
+    padding: 15px 0;
+    max-width: 650px;
+}
+
+#small-mc-img {
+    align-self: center;
+    width: 700px;
+    -webkit-transform: scaleX(-1);
+    transform: scaleX(-1);
+}
+
+.ju-content {
+    text-align: center;
+}
+
+.ju-content > h2 {
+    padding: 0 0 30px 0;
+}
+
+.ju-content > p {
+    width: 65%;
+    max-width: 650px;
+    margin: auto auto;
+}
+
+.ju-upload-btn-content {
+    cursor: pointer;
+    width: fit-content;
+    margin: auto auto;
+    padding: 8px 60px;
+    background-color: #68d651;
+    border-radius: 50px;
+    transition: background-color 250ms;
+}
+
+.ju-upload-btn-text {
+    font-family: 'Quicksand', sans-serif;
+    font-size: 2em;
+}
+
+@keyframes downAndUp {
+    0%, 100% {
+        transform: translateY(-20px);
+    }
+    50% {
+        transform: translateY(0);
+    }
+}
