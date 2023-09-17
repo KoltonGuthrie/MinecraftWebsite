@@ -1,0 +1,42 @@
+
+h1 {
+    font-size: 4em;
+}
+
+h2 {
+    font-size: 2em;
+}
+
+p {
+    font-size: 1em;
+}
+
+.row-content {
+    width: 100%;
+}
+
+.hero {
+    background-size: cover;
+}
+
+.wit-content > p {
+    width: 80%;
+}
+
+.wwill-content {
+    display: block;
+    text-align: center;
+}
+
+#small-mc-img {
+    width: 300px;
+}
+
+.ju-upload-btn-content {
+    padding: 8px 45px;
+}
+
+.ju-upload-btn-text {
+    font-family: 'Quicksand', sans-serif;
+    font-size: 1.5em;
+}

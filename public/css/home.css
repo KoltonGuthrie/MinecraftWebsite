@@ -2,6 +2,10 @@
 
 @import url('https://fonts.googleapis.com/css2?family=Roboto&display=swap');
 
+:root {
+    --slide-up-y: -20px;
+}
+
 html {
     scroll-behavior: smooth;
 }
@@ -55,6 +59,7 @@ p {
 }
 
 .hero-content {
+    width: 75%;
     text-align: center;
     position: absolute;
     top: 50%;
@@ -179,9 +184,18 @@ p {
     font-size: 2em;
 }
 
+@media (max-height: 550px) {
+    .hero-down-btn {
+        bottom: 10px;
+    }
+    :root {
+        --slide-up-y: -5px;
+    }
+}
+
 @keyframes downAndUp {
     0%, 100% {
-        transform: translateY(-20px);
+        transform: translateY(var(--slide-up-y));
     }
     50% {
         transform: translateY(0);
