@@ -153,16 +153,23 @@ const server = Bun.serve({
 			if(rateLimiterRes.remainingPoints <= 0) return new Response("Too Many Requests!", { status: 429 , headers }); 
 
 			const imageID = URL(req.url).searchParams.get("id") || null;
+			const getOriginal = URL(req.url).searchParams.get("original") || false;
 			const image = await getImage({ id: imageID });
 
 			if (image === null) return new Response(`Unknown image id!`, { status: 404, headers });
 			if (image.status !== StatusCodes.done) return new Response(`Not done creating image!`, { status: 404, headers });
-			if (image.minecraft_file === undefined) return new Response(`There is no finished image!`, { status: 404, headers });
+			if (image.minecraft_file === undefined && getOriginal === false) return new Response(`There is no finished image!`, { status: 404, headers });
+			if (image.original_file === undefined && getOriginal === true) return new Response(`There is no original image!`, { status: 404, headers });
+
 
 			headers['Content-Type'] = 'image/png';
 			headers['Content-Disposition'] = `attachment; filename="${image.original_file_name || image.id}"`
 			
-			return new Response(Bun.file(image.minecraft_file), { status: 200, headers });
+			if(getOriginal) {
+				return new Response(Bun.file(image.original_file), { status: 200, headers });
+			} else {
+				return new Response(Bun.file(image.minecraft_file), { status: 200, headers });
+			}
 		}
 
         const filePath = BASE_PATH + new URL(req.url).pathname;
