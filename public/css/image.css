@@ -63,7 +63,7 @@ body {
 
 #bar {
 	position: inherit;
-	width: 50%;
+	width: 0%;
 	height: inherit;
     background-image: url("/image/loading-bar.png");
     background-repeat: no-repeat;

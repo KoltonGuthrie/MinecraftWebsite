@@ -15,7 +15,7 @@
 		<div class="loading-bar">
             <div class="bar">
                 <div id="bar"></div>
-				<p id="percentage"></p>
+				<p id="percentage">0%</p>
             </div>
         </div>
 		<div class="image-main">
@@ -76,6 +76,13 @@
 
 			socket.addEventListener("open", (e) => (document.querySelector("#ws_connected").innerText = "true"));
 			socket.addEventListener("close", (e) => (document.querySelector("#ws_connected").innerText = "false"));
+		
+			function setBar(n) {
+				const percentage = Math.min(Math.ceil(n), 100);
+				document.querySelector("#bar").style.width = `${percentage}%`;
+				$("#percentage").text(`${percentage}%`)
+			}
+		
 		</script>
 	</body>
 </html>
