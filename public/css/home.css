@@ -138,6 +138,7 @@ p {
 }
 
 .wwill-text > p {
+    margin: auto auto;
     padding: 15px 0;
     max-width: 650px;
 }
