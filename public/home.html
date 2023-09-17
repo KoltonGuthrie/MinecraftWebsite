@@ -20,6 +20,7 @@
           <p class="file-name"></p>
           <div class="hero-upload-btn-content file-upload">
             <p class="hero-upload-btn-text">UPLOAD FILE</p>
+            <div id="loading" class="hide"></div>
           </div>
         </div>
       </div>
@@ -55,6 +56,7 @@
           <p class="file-name"></p>
           <div class="ju-upload-btn-content file-upload">
             <p class="ju-upload-btn-text">UPLOAD FILE</p>
+            <div id="loading" class="hide"></div>
           </div>
         </div>
       </div>
@@ -81,6 +83,7 @@
           $(".file-name").text(file);
 
           if ($(this).val() !== "") {
+            $("#loading").removeClass("hide");
             $("#upload-form").submit();
           } else {
               alertify.error('Please select a file');

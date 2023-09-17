@@ -82,6 +82,8 @@ p {
 }
 
 .hero-upload-btn-content {
+    display: flex;
+    align-items: center;
     cursor: pointer;
     width: fit-content;
     margin: auto auto;
@@ -170,6 +172,8 @@ p {
 }
 
 .ju-upload-btn-content {
+    display: flex;
+    align-items: center;
     cursor: pointer;
     width: fit-content;
     margin: auto auto;
@@ -184,6 +188,24 @@ p {
     font-size: 2em;
 }
 
+.hide {
+    display: none !important;
+}
+
+#loading {
+    margin: 0 0 0 10px;
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border: 3px solid rgba(255,255,255,.3);
+    border-radius: 50%;
+    border-top-color: #fff;
+    animation: spin 1s ease-in-out infinite;
+    -webkit-animation: spin 1s ease-in-out infinite;
+}
+  
+
+
 @media (max-height: 550px) {
     .hero-down-btn {
         bottom: 10px;
@@ -193,7 +215,23 @@ p {
     }
 }
 
+@keyframes spin {
+    to { -webkit-transform: rotate(360deg); }
+}
+@-webkit-keyframes spin {
+    to { -webkit-transform: rotate(360deg); }
+}
+
 @keyframes downAndUp {
+    0%, 100% {
+        transform: translateY(var(--slide-up-y));
+    }
+    50% {
+        transform: translateY(0);
+    }
+}
+
+@-webkit-keyframes downAndUp {
     0%, 100% {
         transform: translateY(var(--slide-up-y));
     }
