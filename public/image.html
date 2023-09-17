@@ -23,6 +23,7 @@
 				<img id="mc-image" />
 			</div>
 		</div>
+		<img id='original-image' src=""/>
 		<script>
 			const StatusCodes = {
 				starting: 0,
@@ -32,6 +33,9 @@
 			};
 
 			const imageID = new URL(document.URL).searchParams.get("id");
+
+			$('#original-image').attr('src', `/view?id=${imageID}&original=true`);
+
 			const socket = new WebSocket(`ws://${document.location.host}/ws?id=${imageID}`);
 
 			socket.addEventListener("message", (e) => {
