@@ -1,3 +1,7 @@
+@import url('https://fonts.googleapis.com/css2?family=Quicksand&display=swap');
+
+@import url('https://fonts.googleapis.com/css2?family=Roboto&display=swap');
+
 * {
     margin: 0;
     padding: 0;
@@ -29,8 +33,8 @@ body {
 }
 
 .loading-bar {
-	width: 480px;
-    height: 48px;
+    width: calc(160px * 3);
+    height: calc(16px * 3);
 
     border-color: black;
     border-width: 5px;
@@ -42,11 +46,19 @@ body {
 }
 
 .bar {
+    display: flex;
 	position: absolute;
 	width: inherit;
 	height: inherit;
     border-radius: 50px;
     overflow: hidden;
+}
+
+#percentage {
+    z-index: 1;
+    margin: auto auto;
+    font-family: 'Quicksand', sans-serif;
+    font-size: 1.5em;
 }
 
 #bar {
@@ -59,5 +71,4 @@ body {
 	image-rendering: pixelated;
     border-radius: 50px;
     transition: width 1s ease-out;
-
 }
