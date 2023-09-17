@@ -162,7 +162,6 @@ const server = Bun.serve({
 		}
 
         const filePath = BASE_PATH + new URL(req.url).pathname;
-        console.log(filePath);
         if(fs.existsSync(filePath)) {
             return new Response(Bun.file(filePath));
         }
