@@ -70,5 +70,5 @@ body {
     background-size: cover;
 	image-rendering: pixelated;
     border-radius: 50px;
-    transition: width 1s ease-out;
+    transition: width 500ms ease-out;
 }
