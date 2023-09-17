@@ -8,7 +8,6 @@
 
 html {
     scroll-behavior: smooth;
-    -ms-overflow-style: none;
     scrollbar-width: none;
 }
 
@@ -71,11 +70,7 @@ p {
     background-size: 100% 100%;
     width: 110%;
     height: 110%;
-  
-    -webkit-filter: blur(5px);
-    -moz-filter: blur(5px);
-    -o-filter: blur(5px);
-    -ms-filter: blur(5px);
+
     filter: blur(5px);
   }
 
@@ -174,7 +169,6 @@ p {
 #small-mc-img {
     align-self: center;
     width: 700px;
-    -webkit-transform: scaleX(-1);
     transform: scaleX(-1);
 }
 
@@ -222,7 +216,6 @@ p {
     border-radius: 50%;
     border-top-color: #fff;
     animation: spin 1s ease-in-out infinite;
-    -webkit-animation: spin 1s ease-in-out infinite;
 }
   
 
