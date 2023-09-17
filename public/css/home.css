@@ -64,7 +64,7 @@ p {
     z-index: -1;
   
     display: block;
-    background-image: url("../image/hero.jpg");
+    background-image: url("/image/hero.jpg");
     background-position: center;
     background-repeat: no-repeat;
     background-size: 100% 100%;
