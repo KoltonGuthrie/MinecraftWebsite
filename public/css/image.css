@@ -27,3 +27,43 @@ body {
 .viewer-canvas > img {
     image-rendering: pixelated;
 }
+
+.loading-bar {
+	width: 480px;
+	height: 48px;
+}
+
+.bottom-bar {
+	position: absolute;
+	width: inherit;
+	height: inherit;
+}
+
+#b-bar {
+	position: inherit;
+	width: 100%;
+	height: inherit;
+    background-color: rgb(49, 49, 49);
+    border-radius: 50px;
+}
+
+.top-bar {
+	position: absolute;
+	width: inherit;
+	height: inherit;
+    border-radius: 50px;
+    overflow: hidden;
+}
+
+#t-bar {
+	position: inherit;
+	width: 50%;
+	height: inherit;
+    background-image: url("/image/loading-bar.jpg");
+    background-repeat: no-repeat;
+    background-size: cover;
+	image-rendering: pixelated;
+    border-radius: 50px;
+    transition: width 1s ease-out;
+
+}
