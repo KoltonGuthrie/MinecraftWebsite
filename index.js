@@ -81,7 +81,7 @@ const server = Bun.serve({
 			const formdata = await req.formData();
 			const name = formdata.get("name");
 			const photo = formdata.get("image");
-			if (!photo) throw new Error("Must upload an image.");
+			if (!photo?.size) throw new Error("Must upload an image.");
 
             const dir = __dirname;
 			const folderPath = `${dir}/images/${imageID}`;
