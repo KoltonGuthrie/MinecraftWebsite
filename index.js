@@ -56,17 +56,9 @@ const server = Bun.serve({
 
 			if(rateLimiterRes.remainingPoints <= 0) return new Response("Too Many Requests!", { status: 429 , headers }); 
 
-			let str = "";
-			for (k in cookies) {
-				const key = k;
-				const value = cookies[key];
-
-				str += serialize(key, value) + ";";
-			}
-
 			const imageID = URL(req.url).searchParams.get("id") || null;
 
-			headers["Set-Cookie"] = str;
+			headers["Set-Cookie"] = cookiesToString(cookies);;
  
 			const success = server.upgrade(req, { data: { token, imageID }, headers });
 			return success ? undefined : new Response("WebSocket upgrade error", { status: 400 });
@@ -175,6 +167,10 @@ const server = Bun.serve({
             return new Response(Bun.file(filePath));
         }
 
+		const headers = {};
+
+		headers["Set-Cookie"] = cookiesToString(cookies);
+
 		return new Response(`${path} is an unknown page!`, { status: 404, headers });
 	},
 	websocket: {
@@ -234,6 +230,16 @@ const server = Bun.serve({
 		close(ws) {},
 	},
 });
+
+function cookiesToString(c) {
+	let s = "";
+	for (k in c) {
+		const value = c[k];
+
+		s += serialize(k, value) + ";";
+	}
+	return s;
+}
 
 async function checkRateLimit(token, amount) {
 	if(token === undefined || amount === undefined) return null;;
