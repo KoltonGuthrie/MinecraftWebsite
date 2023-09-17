@@ -3,7 +3,6 @@ const { v4: uuidv4 } = require("uuid");
 const { StatusCodes } = require("./src/statusCodes.js");
 const fs = require("fs");
 const { RateLimiterMemory } = require("rate-limiter-flexible");
-const ejs = require('ejs');
 
 const { addImage, updateImage, getImage, addWebsocket, getUser, addUser, getWebsocket } = require("./src/database.js");
 
@@ -26,12 +25,6 @@ const server = Bun.serve({
 
 		if (cookies.token === undefined) {
 			cookies.token = uuidv4();
-		}
-
-		if (path === "/ejs") {
-			const html = await ejs.renderFile('public/test.html', {name: "Kolton"});
-			console.log(html);
-			return new Response(html, { headers: { "Content-Type": "text/html" } });
 		}
 
 		if (path === "/") {
