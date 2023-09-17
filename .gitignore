@@ -4,3 +4,4 @@ versions
 image-maker.js
 profilePicture.png
 images/*
+.env
