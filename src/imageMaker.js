@@ -146,6 +146,8 @@ function rgbToHex(r, g, b) {
 			}
 		}
 
+		postMessage({percentage: 99}) // Send 99% before the file saves
+
 		const folderPath = `./images/${imageData.id}`;
         const filePah = `/minecraft_image.png`;
 
