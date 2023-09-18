@@ -47,8 +47,8 @@ function rgbToHex(r, g, b) {
 			}
 
 			if(img.status === StatusCodes.error) postMessage({ status: img.status})
-			else if(img.status === StatusCodes.done) postMessage({ minecraft_image: img.minecraft_file, status: img.status})
-		
+			else if(img.status === StatusCodes.done) postMessage({ minecraft_image: img.minecraft_file, percentage: 100, status: img.status})
+
 			return;
 		}
 
