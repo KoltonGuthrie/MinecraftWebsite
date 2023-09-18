@@ -7,17 +7,32 @@
 		<link rel="stylesheet" href="css/viewer.min.css">
 		<title>Minecraft Image</title>
 		<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+		<script src="javascript/image.js"></script>
 		<script src="javascript/viewer.min.js"></script>
 	</head>
 	<body>
+
+		<div class="hero row">
+			<div class="hero-image"></div>
+			<div class="hero-content">
+				<div class="hero-text">
+					<h1>Minecraft Image Maker</h1>
+					<p class="creating">Creating <span id="file-name"></span></p>
+			  	</div>
+				<div class="loading-bar-container">
+					<div class="loading-bar">
+						<div class="bar">
+							<div id="bar"></div>
+							<p id="percentage">0%</p>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+
 		<p>Websocket connected: <span id="ws_connected"></span></p>
 		
-		<div class="loading-bar">
-            <div class="bar">
-                <div id="bar"></div>
-				<p id="percentage">0%</p>
-            </div>
-        </div>
+		
 		<div class="image-main">
 			<div class="image-container">
 				<img id="mc-image" />
@@ -34,7 +49,9 @@
 
 			const imageID = new URL(document.URL).searchParams.get("id");
 
-			$('#original-image').attr('src', `/view?id=${imageID}&original=true`);
+			//$('#original-image').attr('src', `/view?id=${imageID}&original=true`);
+
+			$('.hero-image').css('background-image', `url(/view?id=${imageID}&original=true)`)
 
 			const socket = new WebSocket(`ws://${document.location.host}/ws?id=${imageID}`);
 
