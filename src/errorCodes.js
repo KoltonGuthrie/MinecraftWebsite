@@ -5,5 +5,6 @@ export const ErrorCodes = {
     reading_file_error: 3,
     image_too_small: 4,
     image_insert_failed: 5,
+    image_not_found: 6,
     unknown_error: 500,
 }

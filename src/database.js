@@ -63,7 +63,7 @@ export async function addImage({id, userID, original_file_name, original_file = 
 	return await getImage({ id });
 }
 
-export async function getImage({ id = "%"}) {
+export async function getImage({ id }) {
 	const db = await connect();
     const query = await db.prepare(`SELECT * FROM images WHERE id LIKE ?;`,[id]);
 	const result = await query.get();

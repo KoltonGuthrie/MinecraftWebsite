@@ -2,14 +2,7 @@ const { StatusCodes } = require("./statusCodes.js");
 const { ErrorCodes } = require("./errorCodes.js");
 const { getImage, updateImage } = require("./database.js");
 const fs = require('fs');
-
-const data = JSON.parse(process.argv.slice(2)[0]);
-
-async function output(json) {
-	process.stdout.write(JSON.stringify(JSON.stringify(json)));
-	await Bun.sleep(1); // Stop outputs being sent at the same time
-	return;
-}
+const { workerData } = require('node:worker_threads'); // Bun does not support workerData?
 
 function rgbToHex(r, g, b) {
     return "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
@@ -32,7 +25,15 @@ function rgbToHex(r, g, b) {
 
 (async () => {
 	try {
+		const data = JSON.parse(workerData);
+
 		const imageData = await getImage({ id: data.id });
+
+		if(imageData === null) {
+			const error = ErrorCodes.image_not_found;
+			postMessage({ status: StatusCodes.error, erorr_code: error, message: "Image could not be found" });
+			return process.exit(0);
+		}
 
 		if (imageData.status !== StatusCodes.starting) { // Has already started
 			let img = await getImage({ id: data.id });
@@ -41,16 +42,16 @@ function rgbToHex(r, g, b) {
 				// If running
 				await Bun.sleep(5000); // Sleep for 5 seconds
 				img = await getImage({ id: data.id });
-				await output({ status: img.status});
+				postMessage({ status: img.status});
 
 			}
 
-			await output({ status: img.status});
+			postMessage({ status: img.status});
 			return;
 		}
 
 		await updateImage({ id: imageData.id, key: "status", value: StatusCodes.running });
-		await output({ status: StatusCodes.running });
+		postMessage({ status: StatusCodes.running });
 
 		const { Image } = require("image-js");
 
@@ -76,9 +77,9 @@ function rgbToHex(r, g, b) {
 		const blockSize = Math.sqrt(totalPixels / MAX_BLOCKS);
 		const totalBlocks = totalPixels / Math.pow(blockSize, 2);
 
-		await output({ message: `totalPixels: ${totalPixels}` });
-		await output({ message: `blockSize: ${blockSize}` });
-		await output({ message: `totalBlocks: ${totalBlocks}` });
+		postMessage({ message: `totalPixels: ${totalPixels}` });
+		postMessage({ message: `blockSize: ${blockSize}` });
+		postMessage({ message: `totalBlocks: ${totalBlocks}` });
 
 
 		let cachedPhotos = new Map();
@@ -118,7 +119,7 @@ function rgbToHex(r, g, b) {
 
 				const error = ErrorCodes.image_too_small;
 
-				await output({ status: StatusCodes.error, erorr_code: error, message: "Image is too small" });
+				postMessage({ status: StatusCodes.error, erorr_code: error, message: "Image is too small" });
 				process.exit(0);
 
 			}
@@ -126,7 +127,7 @@ function rgbToHex(r, g, b) {
 
 			const error = ErrorCodes.image_too_small;
 
-			await output({ status: StatusCodes.error, erorr_code: error, message: "Image is too small" });
+			postMessage({ status: StatusCodes.error, erorr_code: error, message: "Image is too small" });
 			process.exit(0);
 
 		}
@@ -172,7 +173,7 @@ function rgbToHex(r, g, b) {
 
 					const error = ErrorCodes.image_insert_failed;
 
-					await output({ status: StatusCodes.error, erorr_code: error, message: "Failed to add an image block into the final output" });
+					postMessage({ status: StatusCodes.error, erorr_code: error, message: "Failed to add an image block into the final output" });
 					process.exit(0);
 
 				}
@@ -183,7 +184,7 @@ function rgbToHex(r, g, b) {
 		const folderPath = `./images/${imageData.id}`;
         const filePah = `/minecraft_image.png`;
 
-		await output({ message: `${folderPath}${filePah}` })
+		postMessage({ message: `${folderPath}${filePah}` })
 
         if (!fs.existsSync(folderPath)) {
             fs.mkdirSync(folderPath);
@@ -193,13 +194,13 @@ function rgbToHex(r, g, b) {
 		await updateImage({ id: imageData.id, key: "minecraft_file", value: `${folderPath}${filePah}` });
 
 		await updateImage({ id: imageData.id, key: "status", value: StatusCodes.done });
-		await output({ status: StatusCodes.done });
+		postMessage({ status: StatusCodes.done });
 
 	} catch (err) {
 
 		const error = ErrorCodes.unknown_error;
 
-		await output({ status: StatusCodes.error, erorr_code: error, info: err.toString() });
+		postMessage({ status: StatusCodes.error, erorr_code: error, info: err.toString() });
 		process.exit(error);
 
 	}
