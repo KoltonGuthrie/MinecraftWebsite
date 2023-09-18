@@ -41,7 +41,7 @@ socket.addEventListener("message", (e) => {
   }
 
   if (msg?.minecraft_image) {
-    $("#mc-image").attr("src", `http://${document.location.host}/view?id=${imageID}`);
+    $("#mc-image").css("background-image", `url(http://${document.location.host}/view?id=${imageID})`);
     const viewer = new Viewer(document.querySelector('#mc-image'), {
       
       button: false,
