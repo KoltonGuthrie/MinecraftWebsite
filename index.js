@@ -152,7 +152,7 @@ const server = Bun.serve({
 			const image = await getImage({ id: imageID });
 
 			if (image === null) return new Response(`Unknown image id!`, { status: 404, headers });
-			if (image.status !== StatusCodes.done) return new Response(`Not done creating image!`, { status: 404, headers });
+			//if (image.status !== StatusCodes.done) return new Response(`Not done creating image!`, { status: 404, headers });
 			if (image.minecraft_file === undefined && getOriginal === false) return new Response(`There is no finished image!`, { status: 404, headers });
 			if (image.original_file === undefined && getOriginal === true) return new Response(`There is no original image!`, { status: 404, headers });
 
