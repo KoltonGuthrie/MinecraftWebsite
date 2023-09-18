@@ -73,15 +73,6 @@ function rgbToHex(r, g, b) {
 
 		const MAX_BLOCKS = 100_000;
 
-		const totalPixels = mainImage.width*mainImage.height;
-		const blockSize = Math.sqrt(totalPixels / MAX_BLOCKS);
-		const totalBlocks = totalPixels / Math.pow(blockSize, 2);
-
-		postMessage({ message: `totalPixels: ${totalPixels}` });
-		postMessage({ message: `blockSize: ${blockSize}` });
-		postMessage({ message: `totalBlocks: ${totalBlocks}` });
-
-
 		let cachedPhotos = new Map();
 		const minecraftBlockSize = 16;
 
@@ -94,54 +85,16 @@ function rgbToHex(r, g, b) {
 
 		}
 
-		if (mainImage.width - (mainImage.width % blockSize) > blockSize) {
-			if (mainImage.height - (mainImage.height % blockSize) > blockSize) {
-				if (mainImage.width % blockSize !== 0) {
+		const fact = Math.sqrt(MAX_BLOCKS / (mainImage.width * mainImage.height));
+		mainImage = mainImage.resize({ factor: fact });
 
-					mainImage = mainImage.resize({
-						width: mainImage.width - (mainImage.width % blockSize),
-						height: mainImage.height,
-						preserveAspectRatio: false,
-					});
-
-				}
-
-				if (mainImage.height % blockSize !== 0) {
-
-					mainImage = mainImage.resize({
-						width: mainImage.width,
-						height: mainImage.height - (mainImage.height % blockSize),
-						preserveAspectRatio: false,
-					});
-
-				}
-			} else {
-
-				const error = ErrorCodes.image_too_small;
-
-				postMessage({ status: StatusCodes.error, erorr_code: error, message: "Image is too small" });
-				process.exit(0);
-
-			}
-		} else {
-
-			const error = ErrorCodes.image_too_small;
-
-			postMessage({ status: StatusCodes.error, erorr_code: error, message: "Image is too small" });
-			process.exit(0);
-
-		}
-
-		let mcImage = new Image(
-			Math.floor(mainImage.width / blockSize) * minecraftBlockSize,
-			Math.floor(mainImage.height / blockSize) * minecraftBlockSize
-		);
+		let mcImage = new Image(mainImage.width * minecraftBlockSize,mainImage.height * minecraftBlockSize);
 
 		// get how many slizes
-		let widthSlices = Math.floor(mainImage.width / blockSize);
-		let heightSlices = Math.floor(mainImage.height / blockSize);
+		let widthSlices = Math.floor(mainImage.width);
+		let heightSlices = Math.floor(mainImage.height);
 
-		console.log(widthSlices, heightSlices);
+		const totalBlocks = widthSlices * heightSlices;
 
 		let lastSend = 0;
 		let runs = 0;
@@ -159,7 +112,7 @@ function rgbToHex(r, g, b) {
 				
 
 				let histograms = await mainImage
-					.crop({ x: blockSize * w, y: blockSize * h, width: blockSize, height: blockSize })
+					.crop({ x: w, y: h, width: 1, height: 1 })
 					.colorDepth(8)
 					.getHistograms({ maxSlots: mainImage.maxValue + 1 });
 
