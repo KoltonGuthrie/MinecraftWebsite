@@ -98,8 +98,8 @@ p {
 .loading-bar {
     margin: auto auto;
 
-	width: calc(160px * 3);
-	height: calc(16px * 3);
+	width: calc(160px * 5);
+	height: calc(16px * 5);
 
 	border-color: black;
 	border-width: 5px;
