@@ -3,8 +3,6 @@ let minDiff = 150; // px
 $(document).ready(function () {
     $(".hero").height(window.innerHeight);
 
-	$('#upload-form')[0].reset()
-
     $(window).resize(function () {
 		if(Math.abs(window.innerHeight - $(".hero").height()) > minDiff) {
 			$(".hero").height(window.innerHeight);
@@ -21,8 +19,11 @@ $(document).ready(function () {
 		$(".file-name").text(file);
 
 		if ($(this).val() !== "") {
+			
 			$("#loading").removeClass("hide");
 			$("#upload-form").submit();
+			$('#upload-form')[0].reset()
+
 		} else {
 			alertify.error("Please select a file");
 		}
