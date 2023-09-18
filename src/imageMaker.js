@@ -105,7 +105,7 @@ function rgbToHex(r, g, b) {
 				runs++;
 
 				const percentage = runs / totalBlocks * 100;
-				if(new Date().getTime() - lastSend > 500 ) {
+				if(new Date().getTime() - lastSend > 100 ) {
 					postMessage({percentage: percentage})
 					lastSend = new Date().getTime();
 				};
