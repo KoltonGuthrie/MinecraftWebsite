@@ -3,6 +3,7 @@ const { v4: uuidv4 } = require("uuid");
 const { StatusCodes } = require("./src/statusCodes.js");
 const fs = require("fs");
 const { RateLimiterMemory } = require("rate-limiter-flexible");
+const sharp = require('sharp');
 
 const { addImage, updateImage, getImage, addWebsocket, getUser, addUser, getWebsocket } = require("./src/database.js");
 
@@ -147,6 +148,7 @@ const server = Bun.serve({
 
 			const imageID = URL(req.url).searchParams.get("id") || null;
 			const getOriginal = URL(req.url).searchParams.get("original") || false;
+			const quality = Number(URL(req.url).searchParams.get("quality")) || 100;
 			const image = await getImage({ id: imageID });
 
 			if (image === null) return new Response(`Unknown image id!`, { status: 404, headers });
@@ -154,15 +156,30 @@ const server = Bun.serve({
 			if (image.minecraft_file === undefined && getOriginal === false) return new Response(`There is no finished image!`, { status: 404, headers });
 			if (image.original_file === undefined && getOriginal === true) return new Response(`There is no original image!`, { status: 404, headers });
 
+			let imageFile = null;
+
+			if(getOriginal) {
+				imageFile = Bun.file(image.original_file)
+			} else {
+				imageFile = Bun.file(image.minecraft_file);
+			}
+
+			if(quality > 0 && quality < 100) { // 1-99
+				const arrbuf = await imageFile.arrayBuffer();
+				const buffer = Buffer.from(arrbuf);
+
+				const image = sharp(buffer);
+
+				const compressedImage = await image.jpeg({ quality: quality }).toBuffer();;
+
+				imageFile = compressedImage;
+			}
+
 
 			headers['Content-Type'] = 'image/png';
 			headers['Content-Disposition'] = `attachment; filename="${image.original_file_name || image.id}"`
 			
-			if(getOriginal) {
-				return new Response(Bun.file(image.original_file), { status: 200, headers });
-			} else {
-				return new Response(Bun.file(image.minecraft_file), { status: 200, headers });
-			}
+			return new Response(imageFile, { status: 200, headers });
 		}
 
         const filePath = BASE_PATH + new URL(req.url).pathname;

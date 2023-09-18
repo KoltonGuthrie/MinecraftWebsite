@@ -1,1 +1,1 @@
-{ "dependencies": { "cookie": "^0.5.0", "image-js": "^0.35.4", "nearest-color": "^0.4.4", "rate-limiter-flexible": "^3.0.0", "uuid": "^9.0.1", "viewerjs": "^1.11.5" } }
+{"dependencies":{"cookie":"^0.5.0","image-js":"^0.35.4","nearest-color":"^0.4.4","rate-limiter-flexible":"^3.0.0","sharp":"^0.32.5","uuid":"^9.0.1","viewerjs":"^1.11.5"}}
