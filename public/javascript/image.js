@@ -10,7 +10,7 @@ const imageID = new URL(document.URL).searchParams.get("id");
 const minDiff = 150; // px
 
 $(document).ready(function () {
-    $('.hero-image').css('background-image', `url(/view?id=${imageID}&original=true&quality=50)`);
+    $('.hero-image').css('background-image', `url(/view?id=${imageID}&original=true&quality=10)`);
   
     $(".hero").height(window.innerHeight);
 
@@ -41,7 +41,7 @@ socket.addEventListener("message", (e) => {
   }
 
   if (msg?.minecraft_image) {
-    $("#mc-image").css("background-image", `url(http://${document.location.host}/view?id=${imageID})`);
+    $("#mc-image").attr("src", `http://${document.location.host}/view?id=${imageID}`).addClass("zoom");
     const viewer = new Viewer(document.querySelector('#mc-image'), {
       
       button: false,
