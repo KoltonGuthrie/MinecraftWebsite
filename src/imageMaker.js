@@ -141,10 +141,22 @@ function rgbToHex(r, g, b) {
 		let widthSlices = Math.floor(mainImage.width / blockSize);
 		let heightSlices = Math.floor(mainImage.height / blockSize);
 
+		console.log(widthSlices, heightSlices);
+
+		let lastSend = 0;
+		let runs = 0;
 		for (let w = 0; widthSlices > w; w++) {
 			// loop width
 			for (let h = 0; heightSlices > h; h++) {
 				// loop height
+				runs++;
+
+				const percentage = runs / totalBlocks * 100;
+				if(new Date().getTime() - lastSend > 1000 ) {
+					postMessage({percentage: percentage})
+					lastSend = new Date().getTime();
+				};
+				
 
 				let histograms = await mainImage
 					.crop({ x: blockSize * w, y: blockSize * h, width: blockSize, height: blockSize })
@@ -184,8 +196,6 @@ function rgbToHex(r, g, b) {
 		const folderPath = `./images/${imageData.id}`;
         const filePah = `/minecraft_image.png`;
 
-		postMessage({ message: `${folderPath}${filePah}` })
-
         if (!fs.existsSync(folderPath)) {
             fs.mkdirSync(folderPath);
         }
@@ -194,7 +204,8 @@ function rgbToHex(r, g, b) {
 		await updateImage({ id: imageData.id, key: "minecraft_file", value: `${folderPath}${filePah}` });
 
 		await updateImage({ id: imageData.id, key: "status", value: StatusCodes.done });
-		postMessage({ status: StatusCodes.done });
+		
+		postMessage({ minecraft_image: `${folderPath}${filePah}`, percentage: 100, status: StatusCodes.done})
 
 	} catch (err) {
 
