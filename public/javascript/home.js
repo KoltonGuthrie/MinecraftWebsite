@@ -1,6 +1,13 @@
 let minDiff = 150; // px
 
+$(window).on('pageshow', function(){
+    $('#file').val("");
+	$("#file").prop("disabled", false);
+});
+
 $(document).ready(function () {
+	console.log('ready ' + new Date().getTime())
+	
     $(".hero").height(window.innerHeight);
 
     $(window).resize(function () {
@@ -10,7 +17,7 @@ $(document).ready(function () {
     });
     
 	$(".file-upload").on("click", function () {
-		$("#upload-form input[type='file']").click();
+		$("#file").click();
 	});
 
 	$("#file").on("change", function (e) {
@@ -22,8 +29,8 @@ $(document).ready(function () {
 			
 			$("#loading").removeClass("hide");
 			$("#upload-form").submit();
-			$('#upload-form')[0].reset()
-
+			$("#file").prop("disabled", true);
+			
 		} else {
 			alertify.error("Please select a file");
 		}
