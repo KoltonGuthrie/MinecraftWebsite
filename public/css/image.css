@@ -78,7 +78,7 @@ p {
 
 .creating {
     padding: 75px 0 0 0;
-    color: #42429A;
+	color: white;
 }
 
 .creating:not(.done):after {
