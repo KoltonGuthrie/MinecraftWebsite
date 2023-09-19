@@ -20,6 +20,11 @@ $(document).ready(function () {
 		}
     });
 
+    $('#mc-image').on('load', function() {
+      $('#loading').addClass("hide")
+      $('.image-container').css("background-color", "#00000000");
+    });
+
     createWebSocket();
     
 });
