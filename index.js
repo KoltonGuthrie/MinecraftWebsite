@@ -251,7 +251,6 @@ const server = Bun.serve({
 				worker.removeEventListener("message", on_message);
 				worker.removeEventListener("close", on_close);
 
-				worker.terminate()
 				delete worker;
 				await Bun.shrink();
 				await Bun.gc(true);
