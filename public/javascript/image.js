@@ -7,10 +7,14 @@ const StatusCodes = {
 
 const imageID = new URL(document.URL).searchParams.get("id");
 
+const windowWidth = window.innerWidth;
+const windowHeight = window.innerHeight;
+
+$('.hero-image').css('background-image', `url(view?id=${imageID}&original=true&quality=10&width=${windowWidth}&height=${windowHeight})`);
+
 const minDiff = 150; // px
 
 $(document).ready(function () {
-    $('.hero-image').css('background-image', `url(/view?id=${imageID}&original=true&quality=10)`);
   
     $(".hero").height(window.innerHeight);
 

@@ -4,6 +4,7 @@ const { StatusCodes } = require("./src/statusCodes.js");
 const fs = require("fs");
 const { RateLimiterMemory } = require("rate-limiter-flexible");
 const sharp = require('sharp');
+const { Image } = require('image-js');
 
 const { addImage, updateImage, getImage, addWebsocket, getUser, addUser, getWebsocket } = require("./src/database.js");
 
@@ -148,7 +149,9 @@ const server = Bun.serve({
 
 			const imageID = URL(req.url).searchParams.get("id") || null;
 			const getOriginal = URL(req.url).searchParams.get("original") || false;
-			const quality = Number(URL(req.url).searchParams.get("quality")) || 100;
+			let quality = Number(URL(req.url).searchParams.get("quality")) || 100;
+			const width = Number(URL(req.url).searchParams.get("width")) || null;
+			const height = Number(URL(req.url).searchParams.get("height")) || null;
 			const image = await getImage({ id: imageID });
 
 			if (image === null) return new Response(`Unknown image id!`, { status: 404, headers });
@@ -164,17 +167,16 @@ const server = Bun.serve({
 				imageFile = Bun.file(image.minecraft_file);
 			}
 
-			if(quality > 0 && quality < 100) { // 1-99
-				const arrbuf = await imageFile.arrayBuffer();
-				const buffer = Buffer.from(arrbuf);
-
-				const image = sharp(buffer);
-
-				const compressedImage = await image.jpeg({ quality: quality }).toBuffer();;
-
-				imageFile = compressedImage;
+			if(!(quality > 0 && quality < 100)) { // ! 1-99
+				quality = 100;
 			}
 
+			if(width || height) {
+				const arrbuf = await imageFile.arrayBuffer();
+
+				const img = await Image.load(arrbuf);
+				imageFile = img.resize({width: width, height: height, preserveAspectRatio: true}).toBuffer();;
+			}
 
 			headers['Content-Type'] = 'image/png';
 			headers['Content-Disposition'] = `attachment; filename="${image.original_file_name || image.id}"`
