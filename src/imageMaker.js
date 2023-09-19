@@ -3,6 +3,7 @@ const { ErrorCodes } = require("./errorCodes.js");
 const { getImage, updateImage } = require("./database.js");
 const fs = require('fs');
 const { workerData } = require('node:worker_threads'); // Bun does not support workerData?
+const { Image } = require("image-js");
 
 function rgbToHex(r, g, b) {
     return "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
@@ -54,8 +55,6 @@ function rgbToHex(r, g, b) {
 
 		await updateImage({ id: imageData.id, key: "status", value: StatusCodes.running });
 		postMessage({ status: StatusCodes.running });
-
-		const { Image } = require("image-js");
 
 		let blocks = await Bun.file(`src/savedBlocks.json`).json();
 
