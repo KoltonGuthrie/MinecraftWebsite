@@ -74,6 +74,8 @@ const { Image } = require("image-js");
 		let widthSlices = Math.floor(mainImage.width);
 		let heightSlices = Math.floor(mainImage.height);
 
+		postMessage({message: `Image size: ${widthSlices}, ${heightSlices}`})
+
 		const totalBlocks = widthSlices * heightSlices;
 
 		let lastSend = 0;

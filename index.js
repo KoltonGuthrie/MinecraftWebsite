@@ -255,6 +255,8 @@ const server = Bun.serve({
 					websocket.send(
 						JSON.stringify({info: `Ended with exitCode: ${e.code}`})
 					);
+
+					worker.terminate();
 			});
 			
 		},
