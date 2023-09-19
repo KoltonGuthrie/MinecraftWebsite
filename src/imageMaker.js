@@ -4,26 +4,6 @@ const { getImage, updateImage } = require("./database.js");
 const fs = require('fs');
 const { workerData } = require('node:worker_threads'); // Bun does not support workerData?
 const { Image } = require("image-js");
-const NearestColor = require("nearest-color");
-
-function rgbToHex(r, g, b) {
-    return "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
-  }
-  
-  function mean(histogram) {
-    let total = 0;
-    let sum = 0;
-  
-    for (let i = 0; i < histogram.length; i++) {
-      total += histogram[i];
-      sum += histogram[i] * i;
-    }
-    if (total === 0) {
-      return 0;
-    }
-  
-    return sum / total;
-  }
 
 (async () => {
 	try {
@@ -62,14 +42,12 @@ function rgbToHex(r, g, b) {
 		// Get all blocks for that mc version
 		const MC_VERSION = '1.19';
 		blocks = blocks[MC_VERSION];
-
+		
 		// Convert to proper format to get nearestColor
 		const colors = {};
 		for (const key in blocks) {
-			colors[key] = blocks[key].color;
+			colors[key] = hexToRgb(blocks[key].color);
 		}
-
-		let nearestColor = NearestColor.from(colors);
 
 		let mainImage = await Image.load(imageData.original_file); // read image
 
@@ -128,7 +106,7 @@ function rgbToHex(r, g, b) {
 
 				try {
 
-					let blockImage = cachedPhotos.get(nearestColor(rgbToHex(result[0], result[1], result[2])).name);
+					let blockImage = cachedPhotos.get(nearestColor(rgbToHex(result[0], result[1], result[2]), colors));
 
 					await mcImage.insert(await blockImage, {
 						x: minecraftBlockSize * w,
@@ -140,8 +118,8 @@ function rgbToHex(r, g, b) {
 
 					const error = ErrorCodes.image_insert_failed;
 
-					postMessage({ status: StatusCodes.error, erorr_code: error, message: "Failed to add an image block into the final output" });
-					process.exit(0);
+					postMessage({ status: StatusCodes.error, erorr_code: error, message: "Failed to add an image block into the final output | " + e.toString() });
+					return process.exit(0);
 
 				}
 
@@ -173,3 +151,61 @@ function rgbToHex(r, g, b) {
 
 	}
 })();
+
+
+function rgbToHex(r, g, b) {
+    return "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
+  }
+  
+  function mean(histogram) {
+    let total = 0;
+    let sum = 0;
+  
+    for (let i = 0; i < histogram.length; i++) {
+      total += histogram[i];
+      sum += histogram[i] * i;
+    }
+    if (total === 0) {
+      return 0;
+    }
+  
+    return sum / total;
+  }
+
+  
+  function hexToRgb(hex) {
+	var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+	return result ? {
+	  r: parseInt(result[1], 16),
+	  g: parseInt(result[2], 16),
+	  b: parseInt(result[3], 16)
+	} : null;
+  }
+
+  const closest = new Map();
+
+  function nearestColor(hex, colors) {
+	
+	if(closest.has(hex)) return closest.get(hex);
+
+    const rgb = hexToRgb(hex);
+
+    let min = Infinity;
+    let min_item = null;
+
+    for(const key in colors) {
+        const c = colors[key];
+    
+        const distance = Math.pow((c.r - rgb.r),2) + Math.pow((c.g - rgb.g),2) + Math.pow((c.b - rgb.b),2);
+
+        if(distance < min) {
+            min = distance;
+            min_item = key;
+			if(min === 0) break;
+        }
+    }
+
+	closest.set(hex, min_item);
+    return min_item;
+
+}
