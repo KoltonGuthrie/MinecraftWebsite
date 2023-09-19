@@ -238,7 +238,6 @@ const server = Bun.serve({
 			});
 
 			worker.addEventListener("close", async e => {
-				console.log("Worker done!" + e.code);
 				const websocket = await getWebsocket({ id: CHILD_DATA.socket_id });
 
 					if (e.code !== 0) {
@@ -257,7 +256,7 @@ const server = Bun.serve({
 						JSON.stringify({info: `Ended with exitCode: ${e.code}`})
 					);
 
-					worker = null;
+					delete worker;
 			});
 			
 		},
