@@ -149,7 +149,6 @@ const server = Bun.serve({
 
 			const imageID = URL(req.url).searchParams.get("id") || null;
 			const getOriginal = URL(req.url).searchParams.get("original") || false;
-			let quality = Number(URL(req.url).searchParams.get("quality")) || 100;
 			const width = Number(URL(req.url).searchParams.get("width")) || null;
 			const height = Number(URL(req.url).searchParams.get("height")) || null;
 			const image = await getImage({ id: imageID });
@@ -165,10 +164,6 @@ const server = Bun.serve({
 				imageFile = Bun.file(image.original_file)
 			} else {
 				imageFile = Bun.file(image.minecraft_file);
-			}
-
-			if(!(quality > 0 && quality < 100)) { // ! 1-99
-				quality = 100;
 			}
 
 			if(width || height) {
