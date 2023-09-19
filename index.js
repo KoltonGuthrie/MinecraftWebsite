@@ -25,6 +25,7 @@ const server = Bun.serve({
 		// All request will receive a token cookie if it does not exist
 		const cookies = parse(req.headers.get("cookie") || "");
 
+		// TODO Get IP and use it as the "token" if one does not exist
 		if (cookies.token === undefined) {
 			cookies.token = uuidv4();
 		}
@@ -79,10 +80,15 @@ const server = Bun.serve({
 
 			const imageID = uuidv4();
 
-			const formdata = await req.formData();
+			let formdata = null;
+			try {
+				formdata = await req.formData();
+			} catch(err) {
+				return new Response("Unable to find form data");
+			}
 			const name = formdata.get("name");
 			const photo = formdata.get("image");
-			if (!photo?.size) throw new Error("Must upload an image.");
+			if (!photo?.size) return new Response("Must upload an image.");
 
             const dir = __dirname;
 			const folderPath = `${dir}/images/${imageID}`;
@@ -111,6 +117,8 @@ const server = Bun.serve({
 				created: new Date().getTime(),
 				status: StatusCodes.starting,
 			});
+
+			console.log('starting')
 
 			return Response.redirect(`/image?id=${imageID}`, { headers });
 		}
