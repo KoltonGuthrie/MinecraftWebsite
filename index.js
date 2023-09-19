@@ -5,6 +5,7 @@ const fs = require("fs");
 const { RateLimiterMemory } = require("rate-limiter-flexible");
 const sharp = require('sharp');
 const { Image } = require('image-js');
+const { Worker, isMainThread } = require('worker_threads');
 
 const { addImage, updateImage, getImage, addWebsocket, getUser, addUser, getWebsocket } = require("./src/database.js");
 
@@ -201,6 +202,8 @@ const server = Bun.serve({
 	websocket: {
 		idleTimeout: 60,
 		async open(ws) {
+			if(!isMainThread) return;
+
 			const token = ws.data.token;
 			const imageID = ws.data.imageID;
 			const websocketID = uuidv4();
@@ -223,21 +226,21 @@ const server = Bun.serve({
 				workerData: [ JSON.stringify(CHILD_DATA) ],
 			});
 
-			worker.addEventListener("error", event => {
+			worker.on("error", event => {
 				console.log(event);
 			});
 
-			worker.addEventListener("messageerror", event => {
+			worker.on("messageerror", event => {
 				console.log(event);
 			});
 
-			worker.addEventListener("message", async e => {
+			worker.on("message", async e => {
 				const websocket = await getWebsocket({ id: socket.id });
 
-				websocket.send(JSON.stringify(e.data));
+				websocket.send(JSON.stringify(e));
 			});
 
-			worker.addEventListener("close", async e => {
+			worker.on("close", async e => {
 				const websocket = await getWebsocket({ id: CHILD_DATA.socket_id });
 
 					if (e.code !== 0) {
