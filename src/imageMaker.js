@@ -14,6 +14,8 @@ const { Image } = require("image-js");
 		if(imageData === null) {
 			const error = ErrorCodes.image_not_found;
 			postMessage({ status: StatusCodes.error, erorr_code: error, message: "Image could not be found" });
+			
+			await cleanMemory()
 			return process.exit(0);
 		}
 
@@ -25,17 +27,23 @@ const { Image } = require("image-js");
 				await Bun.sleep(5000); // Sleep for 5 seconds
 				img = await getImage({ id: data.id });
 				postMessage({ status: img.status});
+				
+				await cleanMemory()
 
 			}
 
 			if(img.status === StatusCodes.error) postMessage({ status: img.status})
 			else if(img.status === StatusCodes.done) postMessage({ minecraft_image: img.minecraft_file, percentage: 100, status: img.status})
+			
+			await cleanMemory()
 
 			return;
 		}
 
 		await updateImage({ id: imageData.id, key: "status", value: StatusCodes.running });
 		postMessage({ status: StatusCodes.running });
+		
+		await cleanMemory()
 
 		let blocks = await Bun.file(`src/savedBlocks.json`).json();
 
@@ -75,6 +83,8 @@ const { Image } = require("image-js");
 		let heightSlices = Math.floor(mainImage.height);
 
 		postMessage({message: `Image size: ${widthSlices}, ${heightSlices}`})
+		
+		await cleanMemory()
 
 		const totalBlocks = widthSlices * heightSlices;
 
@@ -89,6 +99,8 @@ const { Image } = require("image-js");
 				const percentage = runs / totalBlocks * 100;
 				if(new Date().getTime() - lastSend > 100 ) {
 					postMessage({percentage: percentage})
+					
+					await cleanMemory()
 					lastSend = new Date().getTime();
 				};
 				
@@ -118,9 +130,12 @@ const { Image } = require("image-js");
 
 				} catch (e) {
 
+					delete mcImage;
+
 					const error = ErrorCodes.image_insert_failed;
 
 					postMessage({ status: StatusCodes.error, erorr_code: error, message: "Failed to add an image block into the final output | " + e.toString() });
+					await cleanMemory();
 					return process.exit(0);
 
 				}
@@ -129,6 +144,8 @@ const { Image } = require("image-js");
 		}
 
 		postMessage({percentage: 99}) // Send 99% before the file saves
+		
+		await cleanMemory()
 
 		const folderPath = `./images/${imageData.id}`;
         const filePah = `/minecraft_image.png`;
@@ -138,21 +155,32 @@ const { Image } = require("image-js");
         }
 
 		await mcImage.save(`${folderPath}${filePah}`);
+		delete mcImage;
 		await updateImage({ id: imageData.id, key: "minecraft_file", value: `${folderPath}${filePah}` });
 
 		await updateImage({ id: imageData.id, key: "status", value: StatusCodes.done });
 		
 		postMessage({ minecraft_image: `${folderPath}${filePah}`, percentage: 100, status: StatusCodes.done})
+		
+		await cleanMemory()
 
 	} catch (err) {
 
 		const error = ErrorCodes.unknown_error;
 
 		postMessage({ status: StatusCodes.error, erorr_code: error, info: err.toString() });
+		
+		await cleanMemory()
 		process.exit(error);
 
 	}
 })();
+
+// TODO Remove once https://github.com/oven-sh/bun/issues/5709 is fixed
+async function cleanMemory() {
+	await Bun.shrink();
+	await Bun.gc(true);
+}
 
 
 function rgbToHex(r, g, b) {

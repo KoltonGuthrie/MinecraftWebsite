@@ -5,7 +5,6 @@ const fs = require("fs");
 const { RateLimiterMemory } = require("rate-limiter-flexible");
 const sharp = require('sharp');
 const { Image } = require('image-js');
-const { Worker, isMainThread } = require('worker_threads');
 
 const { addImage, updateImage, getImage, addWebsocket, getUser, addUser, getWebsocket } = require("./src/database.js");
 
@@ -202,7 +201,6 @@ const server = Bun.serve({
 	websocket: {
 		idleTimeout: 60,
 		async open(ws) {
-			if(!isMainThread) return;
 
 			const token = ws.data.token;
 			const imageID = ws.data.imageID;
@@ -221,26 +219,43 @@ const server = Bun.serve({
 				socket_id: socket.id,
 				id: imageID,
 			};
-
+			
 			const worker = new Worker("src/imageMaker.js", {
 				workerData: [ JSON.stringify(CHILD_DATA) ],
 			});
 
-			worker.on("error", event => {
-				console.log(event);
-			});
+			on_error = function(e) {
+				console.log(e);
+			}
 
-			worker.on("messageerror", event => {
-				console.log(event);
-			});
+			worker.addEventListener("error", on_error);
 
-			worker.on("message", async e => {
+			on_message_error = function(e) {
+				console.log(e);
+			}
+
+			worker.addEventListener("messageerror", on_message_error);
+
+			on_message = async function(e) {
 				const websocket = await getWebsocket({ id: socket.id });
 
-				websocket.send(JSON.stringify(e));
-			});
+				websocket.send(JSON.stringify(e.data));
+			}
 
-			worker.on("close", async e => {
+			worker.addEventListener("message", on_message);
+
+			on_close = async function(e) {
+				// TODO Remove once https://github.com/oven-sh/bun/issues/5709 is fixed
+				worker.removeEventListener("error", on_error);
+				worker.removeEventListener("messageerror", on_message_error);
+				worker.removeEventListener("message", on_message);
+				worker.removeEventListener("close", on_close);
+
+				worker.terminate()
+				delete worker;
+				await Bun.shrink();
+				await Bun.gc(true);
+
 				const websocket = await getWebsocket({ id: CHILD_DATA.socket_id });
 
 					if (e.code !== 0) {
@@ -258,9 +273,10 @@ const server = Bun.serve({
 					websocket.send(
 						JSON.stringify({info: `Ended with exitCode: ${e.code}`})
 					);
+			}
 
-					delete worker;
-			});
+
+			worker.addEventListener("close", on_close);
 			
 		},
 		message(ws, message) {},
