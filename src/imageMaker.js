@@ -4,6 +4,7 @@ const { getImage, updateImage } = require("./database.js");
 const fs = require('fs');
 const { workerData } = require('node:worker_threads'); // Bun does not support workerData?
 const { Image } = require("image-js");
+const NearestColor = require("nearest-color");
 
 function rgbToHex(r, g, b) {
     return "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
@@ -68,7 +69,7 @@ function rgbToHex(r, g, b) {
 			colors[key] = blocks[key].color;
 		}
 
-		let nearestColor = require("nearest-color").from(colors);
+		let nearestColor = NearestColor.from(colors);
 
 		let mainImage = await Image.load(imageData.original_file); // read image
 
