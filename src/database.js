@@ -14,7 +14,7 @@ async function connect() {
 
 async function init() {
 	const db = await connect();
-	await db.run( 'PRAGMA journal_mode = DELETE;' );
+	await db.run( 'PRAGMA journal_mode = WAL;' );
 	await db.run(
 		`CREATE TABLE IF NOT EXISTS 'websockets'
             (
