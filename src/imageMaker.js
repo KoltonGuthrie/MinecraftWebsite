@@ -27,6 +27,9 @@ const { Image } = require("image-js");
 				await Bun.sleep(5000); // Sleep for 5 seconds
 				img = await getImage({ id: data.id });
 				postMessage({ status: img.status});
+				
+				await cleanMemory()
+
 			}
 
 			if(img.status === StatusCodes.error) postMessage({ status: img.status})
@@ -39,6 +42,8 @@ const { Image } = require("image-js");
 
 		await updateImage({ id: imageData.id, key: "status", value: StatusCodes.running });
 		postMessage({ status: StatusCodes.running });
+		
+		await cleanMemory()
 
 		let blocks = await Bun.file(`src/savedBlocks.json`).json();
 
@@ -79,6 +84,8 @@ const { Image } = require("image-js");
 
 		postMessage({message: `Image size: ${widthSlices}, ${heightSlices}`})
 		
+		await cleanMemory()
+
 		const totalBlocks = widthSlices * heightSlices;
 
 		let lastSend = 0;
@@ -92,7 +99,8 @@ const { Image } = require("image-js");
 				const percentage = runs / totalBlocks * 100;
 				if(new Date().getTime() - lastSend > 100 ) {
 					postMessage({percentage: percentage})
-
+					
+					await cleanMemory()
 					lastSend = new Date().getTime();
 				};
 				
@@ -136,6 +144,8 @@ const { Image } = require("image-js");
 		}
 
 		postMessage({percentage: 99}) // Send 99% before the file saves
+		
+		await cleanMemory()
 
 		const folderPath = `./images/${imageData.id}`;
         const filePah = `/minecraft_image.png`;
