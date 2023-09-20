@@ -257,6 +257,7 @@ const server = Bun.serve({
 
 				const websocket = await getWebsocket({ id: CHILD_DATA.socket_id });
 
+					// TODO if worker closes and is inhandled, even if it is not the one making the image, it will updateImage(stauts: 3)
 					if (e.code !== 0) {
 						// Unhandled error
 						console.log(`Ended with exitCode: ${e.code}`);

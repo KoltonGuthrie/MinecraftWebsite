@@ -2,7 +2,7 @@ const { StatusCodes } = require("./statusCodes.js");
 const { ErrorCodes } = require("./errorCodes.js");
 const { getImage, updateImage } = require("./database.js");
 const fs = require('fs');
-const { workerData } = require('node:worker_threads'); // Bun does not support workerData?
+const { workerData, parentPort } = require('worker_threads'); // Bun does not support workerData?
 const { Image } = require("image-js");
 
 (async () => {
@@ -13,7 +13,7 @@ const { Image } = require("image-js");
 
 		if(imageData === null) {
 			const error = ErrorCodes.image_not_found;
-			postMessage({ status: StatusCodes.error, erorr_code: error, message: "Image could not be found" });
+			parentPort.postMessage({ status: StatusCodes.error, erorr_code: error, message: "Image could not be found" });
 			
 			await cleanMemory()
 			return process.exit(0);
@@ -26,14 +26,14 @@ const { Image } = require("image-js");
 				// If running
 				await Bun.sleep(5000); // Sleep for 5 seconds
 				img = await getImage({ id: data.id });
-				postMessage({ status: img.status});
+				parentPort.postMessage({ status: img.status});
 				
-				await cleanMemory()
+				//await cleanMemory()
 
 			}
 
-			if(img.status === StatusCodes.error) postMessage({ status: img.status})
-			else if(img.status === StatusCodes.done) postMessage({ minecraft_image: img.minecraft_file, percentage: 100, status: img.status})
+			if(img.status === StatusCodes.error) parentPort.postMessage({ status: img.status})
+			else if(img.status === StatusCodes.done) parentPort.postMessage({ minecraft_image: img.minecraft_file, percentage: 100, status: img.status})
 			
 			await cleanMemory()
 
@@ -41,9 +41,9 @@ const { Image } = require("image-js");
 		}
 
 		await updateImage({ id: imageData.id, key: "status", value: StatusCodes.running });
-		postMessage({ status: StatusCodes.running });
+		parentPort.postMessage({ status: StatusCodes.running });
 		
-		await cleanMemory()
+		//await cleanMemory()
 
 		let blocks = await Bun.file(`src/savedBlocks.json`).json();
 
@@ -82,9 +82,9 @@ const { Image } = require("image-js");
 		let widthSlices = Math.floor(mainImage.width);
 		let heightSlices = Math.floor(mainImage.height);
 
-		postMessage({message: `Image size: ${widthSlices}, ${heightSlices}`})
+		parentPort.postMessage({message: `Image size: ${widthSlices}, ${heightSlices}`})
 		
-		await cleanMemory()
+		//await cleanMemory()
 
 		const totalBlocks = widthSlices * heightSlices;
 
@@ -98,9 +98,9 @@ const { Image } = require("image-js");
 
 				const percentage = runs / totalBlocks * 100;
 				if(new Date().getTime() - lastSend > 100 ) {
-					postMessage({percentage: percentage})
+					parentPort.postMessage({percentage: percentage})
 					
-					await cleanMemory()
+					//await cleanMemory()
 					lastSend = new Date().getTime();
 				};
 				
@@ -134,7 +134,7 @@ const { Image } = require("image-js");
 
 					const error = ErrorCodes.image_insert_failed;
 
-					postMessage({ status: StatusCodes.error, erorr_code: error, message: "Failed to add an image block into the final output | " + e.toString() });
+					parentPort.postMessage({ status: StatusCodes.error, erorr_code: error, message: "Failed to add an image block into the final output | " + e.toString() });
 					await cleanMemory();
 					return process.exit(0);
 
@@ -143,9 +143,9 @@ const { Image } = require("image-js");
 			}
 		}
 
-		postMessage({percentage: 99}) // Send 99% before the file saves
+		parentPort.postMessage({percentage: 99}) // Send 99% before the file saves
 		
-		await cleanMemory()
+		//await cleanMemory()
 
 		const folderPath = `./images/${imageData.id}`;
         const filePah = `/minecraft_image.png`;
@@ -160,7 +160,7 @@ const { Image } = require("image-js");
 
 		await updateImage({ id: imageData.id, key: "status", value: StatusCodes.done });
 		
-		postMessage({ minecraft_image: `${folderPath}${filePah}`, percentage: 100, status: StatusCodes.done})
+		parentPort.postMessage({ minecraft_image: `${folderPath}${filePah}`, percentage: 100, status: StatusCodes.done})
 		
 		await cleanMemory()
 
@@ -168,7 +168,7 @@ const { Image } = require("image-js");
 
 		const error = ErrorCodes.unknown_error;
 
-		postMessage({ status: StatusCodes.error, erorr_code: error, info: err.toString() });
+		parentPort.postMessage({ status: StatusCodes.error, erorr_code: error, info: err.toString() });
 		
 		await cleanMemory()
 		process.exit(error);
