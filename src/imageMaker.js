@@ -2,18 +2,26 @@ const { StatusCodes } = require("./statusCodes.js");
 const { ErrorCodes } = require("./errorCodes.js");
 const { getImage, updateImage } = require("./database.js");
 const fs = require('fs');
-const { workerData, parentPort } = require('worker_threads'); // Bun does not support workerData?
+//const { workerData, parentPort } = require('worker_threads'); // Bun does not support workerData?
 const { Image } = require("image-js");
+
+async function output(json) {
+	process.stdout.write(JSON.stringify(JSON.stringify(json)));
+	await Bun.sleep(1); // Stop outputs being sent at the same time
+	return;
+}
 
 (async () => {
 	try {
-		const data = JSON.parse(workerData);
+		//const data = JSON.parse(workerData);
+		const data = JSON.parse(process.argv.slice(2)[0]);
+
 
 		const imageData = await getImage({ id: data.id });
 
 		if(imageData === null) {
 			const error = ErrorCodes.image_not_found;
-			parentPort.postMessage({ status: StatusCodes.error, erorr_code: error, message: "Image could not be found" });
+			await output({ status: StatusCodes.error, erorr_code: error, message: "Image could not be found" });
 			
 			await cleanMemory()
 			return process.exit(0);
@@ -26,14 +34,14 @@ const { Image } = require("image-js");
 				// If running
 				await Bun.sleep(5000); // Sleep for 5 seconds
 				img = await getImage({ id: data.id });
-				parentPort.postMessage({ status: img.status});
+				await output({ status: img.status});
 				
 				await cleanMemory()
 
 			}
 
-			if(img.status === StatusCodes.error) parentPort.postMessage({ status: img.status})
-			else if(img.status === StatusCodes.done) parentPort.postMessage({ minecraft_image: img.minecraft_file, percentage: 100, status: img.status})
+			if(img.status === StatusCodes.error) await output({ status: img.status})
+			else if(img.status === StatusCodes.done) await output({ minecraft_image: img.minecraft_file, percentage: 100, status: img.status})
 			
 			await cleanMemory()
 
@@ -41,7 +49,7 @@ const { Image } = require("image-js");
 		}
 
 		await updateImage({ id: imageData.id, key: "status", value: StatusCodes.running });
-		parentPort.postMessage({ status: StatusCodes.running });
+		await output({ status: StatusCodes.running });
 		
 		await cleanMemory()
 
@@ -82,7 +90,7 @@ const { Image } = require("image-js");
 		let widthSlices = Math.floor(mainImage.width);
 		let heightSlices = Math.floor(mainImage.height);
 
-		parentPort.postMessage({message: `Image size: ${widthSlices}, ${heightSlices}`})
+		await output({message: `Image size: ${widthSlices}, ${heightSlices}`})
 		
 		await cleanMemory()
 
@@ -98,7 +106,7 @@ const { Image } = require("image-js");
 
 				const percentage = runs / totalBlocks * 100;
 				if(new Date().getTime() - lastSend > 100 ) {
-					parentPort.postMessage({percentage: percentage})
+					await output({percentage: percentage})
 					
 					await cleanMemory()
 					lastSend = new Date().getTime();
@@ -134,7 +142,7 @@ const { Image } = require("image-js");
 
 					const error = ErrorCodes.image_insert_failed;
 
-					parentPort.postMessage({ status: StatusCodes.error, erorr_code: error, message: "Failed to add an image block into the final output | " + e.toString() });
+					await output({ status: StatusCodes.error, erorr_code: error, message: "Failed to add an image block into the final output | " + e.toString() });
 					await cleanMemory();
 					return process.exit(0);
 
@@ -143,7 +151,7 @@ const { Image } = require("image-js");
 			}
 		}
 
-		parentPort.postMessage({percentage: 99}) // Send 99% before the file saves
+		await output({percentage: 99}) // Send 99% before the file saves
 		
 		await cleanMemory()
 
@@ -160,7 +168,7 @@ const { Image } = require("image-js");
 
 		await updateImage({ id: imageData.id, key: "status", value: StatusCodes.done });
 		
-		parentPort.postMessage({ minecraft_image: `${folderPath}${filePah}`, percentage: 100, status: StatusCodes.done})
+		await output({ minecraft_image: `${folderPath}${filePah}`, percentage: 100, status: StatusCodes.done})
 		
 		await cleanMemory()
 
@@ -168,7 +176,7 @@ const { Image } = require("image-js");
 
 		const error = ErrorCodes.unknown_error;
 
-		parentPort.postMessage({ status: StatusCodes.error, erorr_code: error, info: err.toString() });
+		await output({ status: StatusCodes.error, erorr_code: error, info: err.toString() });
 		
 		await cleanMemory()
 		process.exit(error);
@@ -178,8 +186,8 @@ const { Image } = require("image-js");
 
 // TODO Remove once https://github.com/oven-sh/bun/issues/5709 is fixed
 async function cleanMemory() {
-	await Bun.shrink();
-	await Bun.gc(true);
+	//await Bun.shrink();
+	//await Bun.gc(true);
 }
 
 

@@ -220,6 +220,39 @@ const server = Bun.serve({
 				id: imageID,
 			};
 			
+			const proc = Bun.spawn(["bun", "src/imageMaker.js", JSON.stringify(CHILD_DATA)], {
+				async onExit(proc, exitCode, signalCode, error) {
+					const websocket = await getWebsocket({ id: CHILD_DATA.socket_id });
+
+					if (exitCode > 0) {
+						// Unhandled error
+						console.log(`Process ${proc.id} ended with exitCode: ${exitCode}, signalCode: ${signalCode}, and error: ${error || null}`);
+						await updateImage({ id: CHILD_DATA.id, key: "status", value: StatusCodes.error });
+						const msg = {
+							message: "There was an internal error",
+							errorData: error,
+							status: StatusCodes.error,
+						};
+						return websocket.send(JSON.stringify(msg));
+					}
+
+					// Send to websocket
+					websocket.send(
+						JSON.stringify({info: `Process ${proc.id} ended with exitCode: ${exitCode}, signalCode: ${signalCode}, and error: ${error || null}`})
+					);
+				},
+			});
+
+			// Data taken from the process
+			for await (const chunk of proc.stdout) {
+				const websocket = await getWebsocket({ id: socket.id });
+
+				const json = JSON.parse(JSON.parse(new TextDecoder().decode(chunk)));
+
+				websocket.send(JSON.stringify(json));
+			}
+
+			/*
 			const worker = new Worker("src/imageMaker.js", {
 				workerData: [ JSON.stringify(CHILD_DATA) ],
 			});
@@ -277,7 +310,7 @@ const server = Bun.serve({
 
 
 			worker.addEventListener("close", on_close);
-			
+			*/
 		},
 		message(ws, message) {},
 		close(ws) {},
