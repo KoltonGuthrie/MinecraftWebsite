@@ -162,7 +162,7 @@ const { Image } = require("image-js");
 
 		await updateImage({ id: imageData.id, key: "status", value: StatusCodes.done });
 		
-		parentPort.postMessage({ minecraft_image: `${folderPath}${filePah}`, percentage: 100, status: StatusCodes.done, time: ( endTime.getTime() - newTime.getTime() )});
+		parentPort.postMessage({ minecraft_image: `${folderPath}${filePah}`, percentage: 100, status: StatusCodes.done, time: ( endTime.getTime() - startTime.getTime() )});
 		
 		await cleanMemory()
 
