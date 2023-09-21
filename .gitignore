@@ -5,3 +5,4 @@ profilePicture.png
 images/*
 .env
 bun.lockb
+package-lock.json
