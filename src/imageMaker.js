@@ -88,6 +88,7 @@ const { Image } = require("image-js");
 
 		const totalBlocks = widthSlices * heightSlices;
 
+		const startTime = new Date();
 		let lastSend = 0;
 		let runs = 0;
 		for (let w = 0; widthSlices > w; w++) {
@@ -155,12 +156,13 @@ const { Image } = require("image-js");
         }
 
 		await mcImage.save(`${folderPath}${filePah}`);
+		const endTime = new Date();
 		delete mcImage;
 		await updateImage({ id: imageData.id, key: "minecraft_file", value: `${folderPath}${filePah}` });
 
 		await updateImage({ id: imageData.id, key: "status", value: StatusCodes.done });
 		
-		parentPort.postMessage({ minecraft_image: `${folderPath}${filePah}`, percentage: 100, status: StatusCodes.done})
+		parentPort.postMessage({ minecraft_image: `${folderPath}${filePah}`, percentage: 100, status: StatusCodes.done, time: ( endTime.getTime() - newTime.getTime() )});
 		
 		await cleanMemory()
 
