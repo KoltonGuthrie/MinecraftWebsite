@@ -53,7 +53,7 @@ function activateWebSocket() {
 
     if (msg?.minecraft_image) {
       $('html').animate({ scrollTop: $("#image-anchor").offset().top}, 0);
-      $("#mc-image").attr("src", `http://${document.location.host}/view?id=${imageID}`).addClass("zoom");
+      $("#mc-image").attr("src", `http://${document.location.host}/view?id=${imageID}&original=false&webp=false`).addClass("zoom");
       const viewer = new Viewer(document.querySelector('#mc-image'), {
         
         button: false,
