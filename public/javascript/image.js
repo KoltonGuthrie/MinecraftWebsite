@@ -12,11 +12,12 @@ const socket = new WebSocket(`ws://${document.location.host}?id=${imageID}`);
 const windowWidth = window.innerWidth;
 const windowHeight = window.innerHeight;
 
-$('.hero-image').css('background-image', `url(/view?id=${imageID}&original=true&quality=10&width=${windowWidth}&height=${windowHeight})`);
 
 const minDiff = 150; // px
 
 $(document).ready(function () {
+    $('.hero-image').css('background-image', `url(/view?id=${imageID}&original=true&quality=10&width=${windowWidth}&height=${windowHeight})`);
+
   
     $(".hero").height(window.innerHeight);
 
