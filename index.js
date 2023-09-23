@@ -110,7 +110,7 @@ app.post("/upload", upload.single('image'), async (req, res, next) => {
 
 			if (!req.file === undefined) return res.send("Must upload an image.");
 
-			const imageID = req.file.destination.slice(req.file.destination.lastIndexOf("\\")+1)
+			const imageID = path.basename(req.file.destination);
 
 			let user = await getUser({ token });
 			
