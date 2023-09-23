@@ -33,7 +33,7 @@ let storage = multer.diskStorage({
 const fileFilter = (req, file, cb) =>
 {
     // reject a file
-    if (file.mimetype === 'image/jpeg' || file.mimetype === 'image/png')
+    if (file.mimetype === 'image/jpeg' || file.mimetype === 'image/jpg' || file.mimetype === 'image/png')
     {
         cb(null, true);
     }
@@ -47,10 +47,10 @@ const upload = multer({
 	storage: storage,
     limits:
     {
-        fileSize: 1024 * 1024 * 50 // TODO find out what this is haha
+        fileSize: 1024 * 1024 * 10 // 10Mb
     },
     fileFilter: fileFilter
-});
+}).single('image');
 
 const sharp = require('sharp');
 const { Image } = require('image-js');
@@ -94,20 +94,24 @@ app.get("/", async (req, res) => {
 });
 
 
-app.post("/upload", upload.single('image'), async (req, res, next) => {
-			const token = getToken(req);
+app.post("/upload", async (req, res) => {
+	const token = getToken(req);
 
-			const rateLimiterRes = await checkRateLimit(token, 5);
-			if(rateLimiterRes === null) return res.status(500).set(headers).send("Internal Server Error");
+	const rateLimiterRes = await checkRateLimit(token, 5);
+	if(rateLimiterRes === null) return res.status(500).set(headers).send("Internal Server Error");
 
-			const headers = {
-				"Retry-After": rateLimiterRes.msBeforeNext / 1000,
-				"X-RateLimit-Remaining": rateLimiterRes.remainingPoints,
-				"X-RateLimit-Reset": new Date(Date.now() + rateLimiterRes.msBeforeNext)
-			}
+	const headers = {
+		"Retry-After": rateLimiterRes.msBeforeNext / 1000,
+		"X-RateLimit-Remaining": rateLimiterRes.remainingPoints,
+		"X-RateLimit-Reset": new Date(Date.now() + rateLimiterRes.msBeforeNext)
+	}
 
-			if(rateLimiterRes.remainingPoints <= 0) return res.status(429).set(headers).send("Too Many Requests!"); 
+	if(rateLimiterRes.remainingPoints <= 0) return res.status(429).set(headers).send("Too Many Requests!"); 
 
+	upload(req, res, async function(err) {
+				if(err) {
+					return res.status(500).send(err.message ? err.message : err.toString());
+				}
 
 			if (!req.file) return res.send("Must upload an image.");
 
@@ -176,6 +180,7 @@ app.post("/upload", upload.single('image'), async (req, res, next) => {
 			});
 
 			return res.set(headers).send({image_id: imageID, user_token: token });
+		});
 });
 
 app.get("/image", async (req, res) => {
