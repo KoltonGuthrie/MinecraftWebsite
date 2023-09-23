@@ -10,7 +10,7 @@ const imageID = new URL(document.URL).searchParams.get("id");
 const windowWidth = window.innerWidth;
 const windowHeight = window.innerHeight;
 
-$('.hero-image').css('background-image', `url(view?id=${imageID}&original=true&quality=10&width=${windowWidth}&height=${windowHeight})`);
+$('.hero-image').css('background-image', `url(/view?id=${imageID}&original=true&quality=10&width=${windowWidth}&height=${windowHeight})`);
 
 const minDiff = 150; // px
 
@@ -35,7 +35,7 @@ $(document).ready(function () {
 
 function createWebSocket() {
 
-  const socket = new WebSocket(`ws://${document.location.host}/ws?id=${imageID}`);
+  const socket = new WebSocket(`ws://${document.location.host}?id=${imageID}`);
 
   socket.addEventListener("message", (e) => {
     const msg = JSON.parse(e.data);
@@ -87,8 +87,8 @@ function createWebSocket() {
     console.error(e);
   });
 
-  socket.addEventListener("open", (e) => (document.querySelector("#ws_connected").innerText = "true"));
-  socket.addEventListener("close", (e) => (document.querySelector("#ws_connected").innerText = "false"));
+  socket.addEventListener("open", (e) => {document.querySelector("#ws_connected").innerText = "true"});
+  socket.addEventListener("close", (e) => {console.warn(`Websocket closed with code: ${e.code}, reason: ${e.reason}`); document.querySelector("#ws_connected").innerText = "false"});
 
 }
 

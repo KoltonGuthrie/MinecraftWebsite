@@ -1,20 +1,32 @@
-const { Database = DataBase} = require('sqlite3')
+const { AsyncDatabase } = require("promised-sqlite3");
+const fs = require('fs');
+const path = require("path");
 
 const websockets = new Map(); // Websockets stored in memory (So I can store them as objects)
 
-const file = `db/minecraft_web_database.sqlite`;
+const dir = 'db';
+const file = '/minecraft_web_database.sqlite';
 
 init();
 
-function connect() {
-	const db = new Database(file, { create: true });
+async function connect() {
+
+	if (!fs.existsSync(dir)){
+		fs.mkdirSync(dir);
+	}
+
+	if(!fs.existsSync(path.join(dir, file))) {
+		fs.writeFileSync(path.join(dir, file), '');
+	}
+
+	const db = await AsyncDatabase.open(path.join(dir, file));
 	return db;
 }
 
-function init() {
-	const db = connect();
-	db.run( 'PRAGMA journal_mode = DELETE;' );
-	db.run(
+async function init() {
+	const db = await connect();
+	await db.run( 'PRAGMA journal_mode = DELETE;' );
+	await db.run(
 		`CREATE TABLE IF NOT EXISTS 'websockets'
             (
             'id' STRING NOT NULL,
@@ -22,7 +34,7 @@ function init() {
 			'image_id' STRING NOT NULL
             );`
 	);
-	db.run(
+	await db.run(
 		`CREATE TABLE IF NOT EXISTS 'users'
             (
             'id' STRING NOT NULL,
@@ -30,7 +42,7 @@ function init() {
             'token' STRING NOT NULL
             );`
 	);
-	db.run(
+	await db.run(
 		`CREATE TABLE IF NOT EXISTS 'images'
             (
             'id' STRING NOT NULL,
@@ -45,74 +57,81 @@ function init() {
 	//db.close();
 }
 
-function updateImage({ id = "%", key, value }) {
+async function updateImage({ id = "%", key, value }) {
     if(!key || !value) return null;
-	const db = connect();
-    const query = db.prepare(`UPDATE images SET ${key} = ? WHERE id LIKE ?;`,[value, id]);
-	query.run();
-	//db.close();
-    return getImage({ id });
+
+	const db = await connect();
+    await db.run(`UPDATE images SET ${key} = ? WHERE id LIKE ?;`,[value, id]);
+
+    return await getImage({ id });
 }
 
-function addImage({id, userID, original_file_name, original_file = 'null', minecraft_file = 'null', created, status}) {
-	const db = connect();
-    const query = db.prepare(`INSERT INTO images(id, user_id, original_file_name, original_file, minecraft_file, created, status) VALUES(?,?,?,?,?,?,?);`,[id, userID, original_file_name, original_file, minecraft_file, created, status]);
-	query.run();
-	//db.close();
-	return getImage({ id });
+async function addImage({id, userID, original_file_name, original_file = 'null', minecraft_file = 'null', created, status}) {
+	const db = await connect();
+    await db.run(`INSERT INTO images(id, user_id, original_file_name, original_file, minecraft_file, created, status) VALUES(?,?,?,?,?,?,?);`,[id, userID, original_file_name, original_file, minecraft_file, created, status]);
+	
+	return await getImage({ id });
 }
 
-function getImage({ id }) {
-	const db = connect();
-    const query = db.prepare(`SELECT * FROM images WHERE id LIKE ?;`,[id]);
-	const result = query.get();
-	//db.close();
-	return result;
+async function getImage({ id }) {
+	const db = await connect();
+    const row = await db.get(`SELECT * FROM images WHERE id LIKE ?;`,[id]);
+
+	return row || null;
 }
 
-function addUser({ id, username, token }) {
-	const db = connect();
-	const query = db.prepare(`INSERT INTO users(id, username, token) VALUES(?,?,?);`,[id, username, token]);
-	query.finalize();
-	//db.close();
-	return getUser({ id, username, token });
+async function addUser({ id, username, token }) {
+	const db = await connect();
+	await db.run(`INSERT INTO users(id, username, token) VALUES(?,?,?);`,[id, username, token]);
+
+	return await getUser({id, username, token});
 }
 
-function getUser({ id = "%", username = "%", token = "%" }) {
-	const db = connect();
-	return db.get(`SELECT * FROM users WHERE id LIKE ? AND username LIKE ? AND token LIKE ?;`, [id, username, token], (err, row) => {
-		return row;
-	});
-	//const result = query.get();
-	//db.close();
-	//return result;
+async function getUser({ id = "%", username = "%", token = "%" }) {
+	const db = await connect();
+	const row = await db.get(`SELECT * FROM users WHERE id LIKE ? AND username LIKE ? AND token LIKE ?;`, [id, username, token]);
+
+	return row || null;
 }
 
-function addWebsocket({ id, userID, imageID, ws }) {
-	const db = connect();
-	const query = db.prepare(
-		`INSERT INTO websockets
-        (id, user_id, image_id) VALUES(?,?,?);`,
-        [id, userID, imageID]
-	);
-    query.run();
+async function addWebsocket({ id, user_id, image_id, ws }) {
+	const db = await connect();
+	await db.run(`INSERT INTO websockets(id, user_id, image_id) VALUES(?,?,?);`,[id, user_id, image_id]);
 
     websockets.set(id, ws);
 	//db.close();
 
-	return getWebsocket({id, userID, data: true});
+	return await getWebsocket({id, user_id, image_id, data: true});
+	//return getWebsocket({id, userID, data: true});
 }
 
-function getWebsocket({id = '%', userID = '%', imageID = '%', data = false}) {
-	const db = connect();
-	const query = db.prepare(`SELECT * FROM websockets WHERE id LIKE ? AND user_id LIKE ? AND image_id LIKE ?;`, [id, userID, imageID]);
-	const result = query.get();
-	//db.close();
+async function getWebsocket({id = '%', user_id = '%', image_id = '%', data = false}) {
+	const db = await connect();
+	const row = await db.get(`SELECT * FROM websockets WHERE id LIKE ? AND user_id LIKE ? AND image_id LIKE ?;`, [id, user_id, image_id]);
 
-    if(!result) return null;
-    return data ? result : websockets.get(result.id);
+	if(!data) return websockets.get(row.id);
+    return row || null;
+}
+
+
+async function getWebsockets({id = '%', user_id = '%', image_id = '%', data = false}) {
+	const db = await connect();
+	const row = await db.all(`SELECT * FROM websockets WHERE id LIKE ? AND user_id LIKE ? AND image_id LIKE ?;`, [id, user_id, image_id]);
+	
+	if(data) return row;
+	
+	const arr = [];
+
+	for(let i = 0; i < row.length; i++) {
+		const obj = row[i];
+		const ws = await getWebsocket({id, user_id, image_id, data: false});
+		obj["ws"] = ws;
+		arr.push(obj);
+	}
+
+	return arr;
 }
 
 module.exports = {
-	init, updateImage, addImage, getImage, addUser, getUser, addWebsocket, getWebsocket
+	init, updateImage, addImage, getImage, addUser, getUser, addWebsocket, getWebsocket, getWebsockets
 }

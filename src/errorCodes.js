@@ -1,4 +1,4 @@
-export const ErrorCodes = {
+const ErrorCodes = {
 	none: 0,
     starting_error: 1,
     downloading_error: 2,
@@ -7,4 +7,8 @@ export const ErrorCodes = {
     image_insert_failed: 5,
     image_not_found: 6,
     unknown_error: 500,
+}
+
+module.exports = {
+	ErrorCodes,
 }

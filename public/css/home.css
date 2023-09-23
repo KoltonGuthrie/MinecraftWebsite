@@ -207,7 +207,7 @@ p {
     display: none !important;
 }
 
-#loading {
+.loading {
     margin: 0 0 0 10px;
     display: inline-block;
     width: 20px;

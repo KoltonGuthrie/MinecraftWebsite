@@ -2,7 +2,7 @@ const { StatusCodes } = require("./statusCodes.js");
 const { ErrorCodes } = require("./errorCodes.js");
 const { getImage, updateImage } = require("./database.js");
 const fs = require('fs');
-const { workerData } = require('node:worker_threads'); // Bun does not support workerData?
+const { workerData, parentPort } = require('node:worker_threads');
 const { Image } = require("image-js");
 const NearestColor = require("nearest-color");
 
@@ -31,12 +31,13 @@ function rgbToHex(r, g, b) {
 
 		const imageData = await getImage({ id: data.id });
 
-		if(imageData === null) {
+		if(imageData === null) { // This should NEVER happen!
 			const error = ErrorCodes.image_not_found;
-			postMessage({ status: StatusCodes.error, erorr_code: error, message: "Image could not be found" });
+			parentPort.postMessage({ status: StatusCodes.error, erorr_code: error, message: "Image could not be found" });
 			return process.exit(0);
 		}
 
+		/*
 		if (imageData.status !== StatusCodes.starting) { // Has already started
 			let img = await getImage({ id: data.id });
 
@@ -44,20 +45,21 @@ function rgbToHex(r, g, b) {
 				// If running
 				await Bun.sleep(5000); // Sleep for 5 seconds
 				img = await getImage({ id: data.id });
-				postMessage({ status: img.status});
+				parentPort.postMessage({ status: img.status});
 
 			}
 
-			if(img.status === StatusCodes.error) postMessage({ status: img.status})
-			else if(img.status === StatusCodes.done) postMessage({ minecraft_image: img.minecraft_file, percentage: 100, status: img.status})
+			if(img.status === StatusCodes.error) parentPort.postMessage({ status: img.status})
+			else if(img.status === StatusCodes.done) parentPort.postMessage({ minecraft_image: img.minecraft_file, percentage: 100, status: img.status})
 
 			return;
 		}
-
+		*/
+		
 		await updateImage({ id: imageData.id, key: "status", value: StatusCodes.running });
-		postMessage({ status: StatusCodes.running });
+		parentPort.postMessage({ status: StatusCodes.running });
 
-		let blocks = await Bun.file(`src/savedBlocks.json`).json();
+		let blocks = await JSON.parse(fs.readFileSync(`src/savedBlocks.json`));
 
 		// Get all blocks for that mc version
 		const MC_VERSION = '1.19';
@@ -108,7 +110,7 @@ function rgbToHex(r, g, b) {
 
 				const percentage = runs / totalBlocks * 100;
 				if(new Date().getTime() - lastSend > 100 ) {
-					postMessage({percentage: percentage})
+					parentPort.postMessage({percentage: percentage})
 					lastSend = new Date().getTime();
 				};
 				
@@ -140,7 +142,7 @@ function rgbToHex(r, g, b) {
 
 					const error = ErrorCodes.image_insert_failed;
 
-					postMessage({ status: StatusCodes.error, erorr_code: error, message: "Failed to add an image block into the final output" });
+					parentPort.postMessage({ status: StatusCodes.error, erorr_code: error, message: "Failed to add an image block into the final output" });
 					process.exit(0);
 
 				}
@@ -148,7 +150,7 @@ function rgbToHex(r, g, b) {
 			}
 		}
 
-		postMessage({percentage: 99}) // Send 99% before the file saves
+		parentPort.postMessage({percentage: 99}) // Send 99% before the file saves
 
 		const folderPath = `./images/${imageData.id}`;
         const filePah = `/minecraft_image.png`;
@@ -162,13 +164,13 @@ function rgbToHex(r, g, b) {
 
 		await updateImage({ id: imageData.id, key: "status", value: StatusCodes.done });
 		
-		postMessage({ minecraft_image: `${folderPath}${filePah}`, percentage: 100, status: StatusCodes.done})
+		parentPort.postMessage({ minecraft_image: `${folderPath}${filePah}`, percentage: 100, status: StatusCodes.done})
 
 	} catch (err) {
-
+		// TODO Save error code into the database
 		const error = ErrorCodes.unknown_error;
 
-		postMessage({ status: StatusCodes.error, erorr_code: error, info: err.toString() });
+		parentPort.postMessage({ status: StatusCodes.error, erorr_code: error, info: err.toString() });
 		process.exit(error);
 
 	}

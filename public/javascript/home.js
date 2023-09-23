@@ -26,13 +26,46 @@ $(document).ready(function () {
 		$(".file-name").text(file);
 
 		if ($(this).val() !== "") {
-			
-			$("#loading").removeClass("hide");
+			$(".loading").removeClass("hide");
 			$("#upload-form").submit();
 			$("#file").prop("disabled", true);
-			
 		} else {
 			alertify.error("Please select a file");
 		}
 	});
+
+	$("#upload-form").on("submit", function(e) {
+		console.log(this);
+		e.preventDefault();
+
+		$.ajax({
+		  type: "POST",
+		  url: "upload",
+		  data: new FormData(this),
+		  contentType: false,
+          cache: false,
+          processData:false,
+		  xhr: function () {
+			  const xhr = new window.XMLHttpRequest();
+
+			  xhr.upload.addEventListener("progress", function(evt) {
+				if (evt.lengthComputable) {
+					var percentComplete = ((evt.loaded / evt.total) * 100);
+					//$(".progress-bar").width(percentComplete + '%');
+					console.log(percentComplete)
+					$(".progress-bar").html(percentComplete+'%');
+				}
+			}, false);
+			return xhr;
+		  },
+		  success: function(e) {
+			window.location = `image?id=${e.image_id}`;
+		  },
+		  error: function(e) {
+			console.error(e);
+			console.error("ERROR!");
+		  }
+		});
+	});
+
 });

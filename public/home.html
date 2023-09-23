@@ -3,13 +3,13 @@
   <head>
     <meta charset="UTF-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-		<link rel="stylesheet" href="css/home.css" />
-    <link rel='stylesheet' media='screen and (max-width: 1350px)' href='css/home-mobile.css' />
-    <link rel="stylesheet" href="css/alertify.min.css" />
+		<link rel="stylesheet" href="/css/home.css" />
+    <link rel='stylesheet' media='screen and (max-width: 1350px)' href='/css/home-mobile.css' />
+    <link rel="stylesheet" href="/css/alertify.min.css" />
     <title>Minecraft Image Maker</title>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
-    <script src="javascript/home.js"></script>
-    <script src="javascript/alertify.min.js"></script>
+    <script src="/javascript/home.js"></script>
+    <script src="/javascript/alertify.min.js"></script>
   </head>
   <body>
     <div class="hero row">
@@ -21,7 +21,7 @@
           <p class="file-name"></p>
           <div class="hero-upload-btn-content file-upload">
             <p class="hero-upload-btn-text">UPLOAD FILE</p>
-            <div id="loading" class="hide"></div>
+            <div class="loading hide"></div>
           </div>
         </div>
       </div>
@@ -31,6 +31,9 @@
         </a>
       </div>
     </div>
+    <div id="progress-wrp">
+      <div class="progress-bar">0%</div>
+  </div>
     <div class="what-is-this row" id="what-is-this">
       <div class="wit-content row-content">
         <h2>What is this?</h2>
@@ -57,15 +60,23 @@
           <p class="file-name"></p>
           <div class="ju-upload-btn-content file-upload">
             <p class="ju-upload-btn-text">UPLOAD FILE</p>
-            <div id="loading" class="hide"></div>
+            <div class="loading hide"></div>
           </div>
         </div>
       </div>
     </div>
 
+    <!--
     <form id="upload-form" action="/upload" method="post" enctype="multipart/form-data">
       <input type="file" id="file" name="image" style="display: none;" />
       <input type="reset" style="display: none;">
     </form>
+    -->
+
+    <form id="upload-form" enctype="multipart/form-data">
+      <input type="file" id="file" name="image" style="display: none;" />
+      <input type="reset" style="display: none;">
+    </form>
+
   </body>
 </html>
