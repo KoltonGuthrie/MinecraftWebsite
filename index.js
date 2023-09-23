@@ -108,7 +108,7 @@ app.post("/upload", upload.single('image'), async (req, res, next) => {
 			if(rateLimiterRes.remainingPoints <= 0) return res.status(429).set(headers).send("Too Many Requests!"); 
 
 
-			if (!req.file === undefined) return res.send("Must upload an image.");
+			if (!req.file) return res.send("Must upload an image.");
 
 			const imageID = path.basename(req.file.destination);
 
@@ -169,7 +169,7 @@ app.post("/upload", upload.single('image'), async (req, res, next) => {
 					worker.removeAllListeners('messageerror');
 					worker.removeAllListeners('message');
 					worker.removeAllListeners('close');
-					
+
 					await worker.terminate();
 					console.log("Terminated!");
 			});
