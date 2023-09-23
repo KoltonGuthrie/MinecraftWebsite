@@ -134,18 +134,18 @@ function rgbToHex(r, g, b) {
 		parentPort.postMessage({percentage: 99}) // Send 99% before the file saves
 
 		const folderPath = `./images/${imageData.id}`;
-        const filePah = `/minecraft_image.png`;
+        const filePath = `/minecraft_image.png`;
 
         if (!fs.existsSync(folderPath)) {
-            fs.mkdirSync(folderPath);
+            fs.mkdirSync(folderPath, {recursive: true});
         }
 
-		await mcImage.save(`${folderPath}${filePah}`);
-		await updateImage({ id: imageData.id, key: "minecraft_file", value: `${folderPath}${filePah}` });
+		await mcImage.save(`${folderPath}${filePath}`);
+		await updateImage({ id: imageData.id, key: "minecraft_file", value: `${folderPath}${filePath}` });
 
 		await updateImage({ id: imageData.id, key: "status", value: StatusCodes.done });
 		
-		parentPort.postMessage({ minecraft_image: `${folderPath}${filePah}`, percentage: 100, status: StatusCodes.done})
+		parentPort.postMessage({ minecraft_image: `${folderPath}${filePath}`, percentage: 100, status: StatusCodes.done})
 
 	} catch (err) {
 		// TODO Save error code into the database
