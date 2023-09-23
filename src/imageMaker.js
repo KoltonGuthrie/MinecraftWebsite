@@ -83,6 +83,7 @@ function rgbToHex(r, g, b) {
 
 		let lastSend = 0;
 		let runs = 0;
+		const s = new Date();
 		for (let w = 0; widthSlices > w; w++) {
 			// loop width
 			for (let h = 0; heightSlices > h; h++) {
@@ -121,15 +122,26 @@ function rgbToHex(r, g, b) {
 
 				} catch (e) {
 
+					delete mcImage;
+					delete mainImage;
+					delete cachedPhotos;
+
 					const error = ErrorCodes.image_insert_failed;
 
 					parentPort.postMessage({ status: StatusCodes.error, erorr_code: error, message: "Failed to add an image block into the final output" });
-					process.exit(0);
+					return process.exit(0);
 
 				}
 
 			}
 		}
+
+		delete mcImage;
+		delete mainImage;
+		delete cachedPhotos;
+
+		const e = new Date();
+		console.log(`${e.getTime()-s.getTime()}ms`)
 
 		parentPort.postMessage({percentage: 99}) // Send 99% before the file saves
 
@@ -148,6 +160,10 @@ function rgbToHex(r, g, b) {
 		parentPort.postMessage({ minecraft_image: `${folderPath}${filePath}`, percentage: 100, status: StatusCodes.done})
 
 	} catch (err) {
+		delete mcImage;
+		delete mainImage;
+		delete cachedPhotos;
+		
 		// TODO Save error code into the database
 		const error = ErrorCodes.unknown_error;
 
