@@ -269,11 +269,11 @@ app.ws('/', async (ws, req) => {
 
 	if(image.status === StatusCodes.error) {
 		// TODO Fetch errorcode from database
-		return ws.send({ status: StatusCodes.error, error: ErrorCodes.unknown_error})
+		return ws.send(JSON.stringify({ status: StatusCodes.error, error: ErrorCodes.unknown_error}));
 	}
 
 	if(image.status === StatusCodes.done) {
-		return ws.send({ minecraft_image: image.minecraft_file, percentage: 100, status: StatusCodes.done})
+		return ws.send(JSON.stringify({ minecraft_image: image.minecraft_file, percentage: 100, status: StatusCodes.done}));
 	}
 
 	await addWebsocket({id: uuidv4(), user_id: user.id, image_id: image.id, ws});

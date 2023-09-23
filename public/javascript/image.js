@@ -7,6 +7,8 @@ const StatusCodes = {
 
 const imageID = new URL(document.URL).searchParams.get("id");
 
+const socket = new WebSocket(`ws://${document.location.host}?id=${imageID}`);
+
 const windowWidth = window.innerWidth;
 const windowHeight = window.innerHeight;
 
@@ -29,13 +31,11 @@ $(document).ready(function () {
       $('.image-container').css("background-color", "#00000000");
     });
 
-    createWebSocket();
-    
+    activateWebSocket();
+
 });
 
-function createWebSocket() {
-
-  const socket = new WebSocket(`ws://${document.location.host}?id=${imageID}`);
+function activateWebSocket() {
 
   socket.addEventListener("message", (e) => {
     const msg = JSON.parse(e.data);

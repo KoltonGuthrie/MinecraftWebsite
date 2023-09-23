@@ -59,7 +59,7 @@ $(document).ready(function () {
 			return xhr;
 		  },
 		  success: function(e) {
-			window.location = `image?id=${e.image_id}`;
+			window.location = `image/?id=${e.image_id}`;
 		  },
 		  error: function(e) {
 			console.error(e);
