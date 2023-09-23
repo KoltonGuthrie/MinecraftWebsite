@@ -225,22 +225,14 @@ app.get("/view", async (req, res) => {
 			let imageFile = null;
 
 			if(getOriginal) {
-				imageFile = fs.readFileSync(image.original_file)
+				imageFile = await sharp(image.original_file).resize({width, height}).toBuffer();
 			} else {
-				imageFile = fs.readFileSync(image.minecraft_file);
+				imageFile = await sharp(image.minecraft_file).resize({width, height}).toBuffer();
 			}
 
-			if(width || height) {
-				const arrbuf = imageFile.buffer;
+			headers['Content-Disposition'] = `attachment; filename="${image.original_file_name || image.id}"`;
 
-				const img = await Image.load(arrbuf);
-				imageFile = img.resize({width: width, height: height, preserveAspectRatio: true}).toBuffer();
-			}
-
-			const readStream = new stream.PassThrough();
-			readStream.end(imageFile);
-
-			return readStream.pipe(res).status(200).set(headers);
+			return res.status(200).set(headers).send(imageFile);
 		});
 
 app.ws('/', async (ws, req) => {
