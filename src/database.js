@@ -54,7 +54,7 @@ async function init() {
             'status' INTEGER NOT NULL
             );`
 	);
-	//db.close();
+	await db.close();
 }
 
 async function updateImage({ id = "%", key, value }) {
@@ -62,6 +62,7 @@ async function updateImage({ id = "%", key, value }) {
 
 	const db = await connect();
     await db.run(`UPDATE images SET ${key} = ? WHERE id LIKE ?;`,[value, id]);
+	await db.close();
 
     return await getImage({ id });
 }
@@ -69,13 +70,15 @@ async function updateImage({ id = "%", key, value }) {
 async function addImage({id, userID, original_file_name, original_file = 'null', minecraft_file = 'null', created, status}) {
 	const db = await connect();
     await db.run(`INSERT INTO images(id, user_id, original_file_name, original_file, minecraft_file, created, status) VALUES(?,?,?,?,?,?,?);`,[id, userID, original_file_name, original_file, minecraft_file, created, status]);
-	
+	await db.close();
+
 	return await getImage({ id });
 }
 
 async function getImage({ id }) {
 	const db = await connect();
     const row = await db.get(`SELECT * FROM images WHERE id LIKE ?;`,[id]);
+	await db.close();
 
 	return row || null;
 }
@@ -83,6 +86,7 @@ async function getImage({ id }) {
 async function addUser({ id, username, token }) {
 	const db = await connect();
 	await db.run(`INSERT INTO users(id, username, token) VALUES(?,?,?);`,[id, username, token]);
+	await db.close();
 
 	return await getUser({id, username, token});
 }
@@ -90,6 +94,7 @@ async function addUser({ id, username, token }) {
 async function getUser({ id = "%", username = "%", token = "%" }) {
 	const db = await connect();
 	const row = await db.get(`SELECT * FROM users WHERE id LIKE ? AND username LIKE ? AND token LIKE ?;`, [id, username, token]);
+	await db.close();
 
 	return row || null;
 }
@@ -97,6 +102,7 @@ async function getUser({ id = "%", username = "%", token = "%" }) {
 async function addWebsocket({ id, user_id, image_id, ws }) {
 	const db = await connect();
 	await db.run(`INSERT INTO websockets(id, user_id, image_id) VALUES(?,?,?);`,[id, user_id, image_id]);
+	await db.close();
 
     websockets.set(id, ws);
 	//db.close();
@@ -108,6 +114,7 @@ async function addWebsocket({ id, user_id, image_id, ws }) {
 async function getWebsocket({id = '%', user_id = '%', image_id = '%', data = false}) {
 	const db = await connect();
 	const row = await db.get(`SELECT * FROM websockets WHERE id LIKE ? AND user_id LIKE ? AND image_id LIKE ?;`, [id, user_id, image_id]);
+	await db.close();
 
 	if(!data) return websockets.get(row.id);
     return row || null;
@@ -117,7 +124,8 @@ async function getWebsocket({id = '%', user_id = '%', image_id = '%', data = fal
 async function getWebsockets({id = '%', user_id = '%', image_id = '%', data = false}) {
 	const db = await connect();
 	const row = await db.all(`SELECT * FROM websockets WHERE id LIKE ? AND user_id LIKE ? AND image_id LIKE ?;`, [id, user_id, image_id]);
-	
+	await db.close();
+
 	if(data) return row;
 	
 	const arr = [];

@@ -164,6 +164,12 @@ app.post("/upload", upload.single('image'), async (req, res, next) => {
 					// Send to websocket
 					await sendToWebsockes({image_id: CHILD_DATA.id, str: JSON.stringify({info: `Ended with exitCode: ${e.code}`})})
 					//websocket.send(JSON.stringify({info: `Ended with exitCode: ${e.code}`}));
+					
+					worker.removeAllListeners('error');
+					worker.removeAllListeners('messageerror');
+					worker.removeAllListeners('message');
+					worker.removeAllListeners('close');
+					
 					await worker.terminate();
 					console.log("Terminated!");
 			});

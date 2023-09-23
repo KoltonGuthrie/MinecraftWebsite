@@ -160,10 +160,9 @@ function rgbToHex(r, g, b) {
 		parentPort.postMessage({ minecraft_image: `${folderPath}${filePath}`, percentage: 100, status: StatusCodes.done})
 
 	} catch (err) {
-		delete mcImage;
 		delete mainImage;
 		delete cachedPhotos;
-		
+
 		// TODO Save error code into the database
 		const error = ErrorCodes.unknown_error;
 
