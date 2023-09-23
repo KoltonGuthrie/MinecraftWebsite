@@ -36,7 +36,7 @@ h2 {
     font-size: 4em;
 }
 
-p {
+p, span {
     line-height: 1.7em;
     font-family: 'Quicksand', sans-serif;
     font-size: 1.6em;
@@ -88,9 +88,29 @@ p {
     color: white;
 }
 
-.file-name {
-    font-family: 'Quicksand', sans-serif;
+.hero-upload-btn .file-name {
     font-size: 1em;
+    max-width: 200px;
+}
+
+.ju-upload-btn .file-name {
+    font-size: 1.7em;
+    max-width: 300px;
+}
+
+.file-name {
+    display: inline-block;
+    vertical-align: middle;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    font-family: 'Quicksand', sans-serif;
+    color: #68d651;
+}
+
+.percentage {
+    margin: 0 0 0 5px;
+    font-size: 0.6em;
     color: #68d651;
 }
 
@@ -101,8 +121,9 @@ p {
 .hero-upload-btn-content {
     display: flex;
     align-items: center;
+    justify-content: center;
     cursor: pointer;
-    width: fit-content;
+    width: 175px;
     margin: auto auto;
     padding: 8px 30px;
     background-color: #68d651;
@@ -113,6 +134,19 @@ p {
 .hero-upload-btn-text {
     font-family: 'Quicksand', sans-serif;
     font-size: 1.2em;
+}
+
+.loading-bar {
+    position: absolute;
+    width: inherit;
+    height: 3px;
+    bottom: 0;
+}
+
+.bar {
+    width: 0%;
+    height: inherit;
+    background: #42429A;
 }
 
 .ju-upload-btn-content:hover, .hero-upload-btn-content:hover {
@@ -196,6 +230,7 @@ p {
 }
 
 .ju-upload-btn-content {
+    position: relative;
     display: flex;
     align-items: center;
     cursor: pointer;

@@ -28,6 +28,7 @@ $(document).ready(function () {
 
 		if ($(this).val() !== "") {
 			$(".loading").removeClass("hide");
+			$(".loading-bar").removeClass("hide");
 			$("#upload-form").submit();
 			$("#file").prop("disabled", true);
 		} else {
@@ -52,9 +53,8 @@ $(document).ready(function () {
 			  xhr.upload.addEventListener("progress", function(evt) {
 				if (evt.lengthComputable) {
 					var percentComplete = ((evt.loaded / evt.total) * 100);
-					//$(".progress-bar").width(percentComplete + '%');
-					console.log(percentComplete)
-					$(".progress-bar").html(percentComplete+'%');
+					$(".bar").css("width", `${percentComplete}%`);
+					$(".percentage").text(`${Math.floor(percentComplete)}%`);
 				}
 			}, false);
 			return xhr;
