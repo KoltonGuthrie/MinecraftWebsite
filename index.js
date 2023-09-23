@@ -66,7 +66,7 @@ app.set('view engine', 'ejs');
 const { addImage, updateImage, getImage, addWebsocket, getUser, addUser, getWebsocket, getWebsockets } = require("./src/database.js");
 
 const opts = {
-	points: 100, // 100 points
+	points: 50, // 100 points
 	duration: 1 * 60, // Per min
 	};
 
