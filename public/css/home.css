@@ -23,6 +23,7 @@ html::-webkit-scrollbar {
 body {
     top: 0;
     left: 0;
+    background-color: #e5c2c2;
 }
 
 h1 {
@@ -134,6 +135,10 @@ p {
     animation: downAndUp 2s ease-in-out infinite;
 }
 
+.what-is-this {
+    background-color: #ffffff;
+}
+
 .wit-content > h2 {
     text-align: center;
     padding: 0 0 30px 0;
@@ -170,6 +175,10 @@ p {
     align-self: center;
     width: 700px;
     transform: scaleX(-1);
+}
+
+.just-upload {
+    background-color: #ffffff;
 }
 
 .ju-content {
