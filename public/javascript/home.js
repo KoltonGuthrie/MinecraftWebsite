@@ -6,7 +6,8 @@ $(window).on('pageshow', function(){
 });
 
 $(document).ready(function () {
-	console.log('ready ' + new Date().getTime())
+	console.log('ready ' + new Date().getTime());
+	$("#file").prop("disabled", false);
 	
     $(".hero").height(window.innerHeight);
 
