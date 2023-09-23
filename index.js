@@ -87,7 +87,7 @@ app.get("/", async (req, res) => {
 		"X-RateLimit-Reset": new Date(Date.now() + rateLimiterRes.msBeforeNext)
 	}
 
-	if(rateLimiterRes.remainingPoints <= 0) res.status(429).set(headers).send("Too Many Requests!"); 
+	if(rateLimiterRes.remainingPoints <= 0) return res.status(429).set(headers).send("Too Many Requests!"); 
 
 	return res.status(200).set(headers).sendFile("public/home.html", {root: __dirname});
 });
