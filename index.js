@@ -164,6 +164,8 @@ app.post("/upload", upload.single('image'), async (req, res, next) => {
 					// Send to websocket
 					await sendToWebsockes({image_id: CHILD_DATA.id, str: JSON.stringify({info: `Ended with exitCode: ${e.code}`})})
 					//websocket.send(JSON.stringify({info: `Ended with exitCode: ${e.code}`}));
+					await worker.terminate();
+					console.log("Terminated!");
 			});
 
 			return res.set(headers).send({image_id: imageID, user_token: token });
