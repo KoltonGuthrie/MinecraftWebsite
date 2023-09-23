@@ -95,7 +95,6 @@ app.get("/", async (req, res) => {
 
 app.post("/upload", upload.single('image'), async (req, res, next) => {
 			const token = getToken(req);
-			console.log(token);
 
 			const rateLimiterRes = await checkRateLimit(token, 5);
 			if(rateLimiterRes === null) return res.status(500).set(headers).send("Internal Server Error");
@@ -112,11 +111,8 @@ app.post("/upload", upload.single('image'), async (req, res, next) => {
 			if (!req.file === undefined) return res.send("Must upload an image.");
 
 			const imageID = req.file.destination.slice(req.file.destination.lastIndexOf("\\")+1)
-			console.log("Getting user...")
 
 			let user = await getUser({ token });
-
-			console.log(user);
 			
 			if (user === null) {
 				const userID = uuidv4();
@@ -131,9 +127,6 @@ app.post("/upload", upload.single('image'), async (req, res, next) => {
 				created: new Date().getTime(),
 				status: StatusCodes.starting,
 			});
-
-			console.log('starting');
-			// START MAKING IMAGE
 
 			const CHILD_DATA = {
 				id: imageID,
@@ -231,8 +224,6 @@ app.get("/view", async (req, res) => {
 
 			let imageFile = null;
 
-			console.log(image);
-
 			if(getOriginal) {
 				imageFile = fs.readFileSync(image.original_file)
 			} else {
@@ -296,7 +287,6 @@ app.get('*', async (req, res) => {
 
 async function sendToWebsockes({id, user_id, image_id, str = "{}"}) {
 	const websockets = await getWebsockets({id, user_id, image_id});
-	console.log(str)
 
 	for(_ of websockets) {
 		if(_.ws === undefined) break;
@@ -304,98 +294,6 @@ async function sendToWebsockes({id, user_id, image_id, str = "{}"}) {
 	}
 	return;
 }
-	
-
-	/*
-
-		if (path === "/ws") {
-			let token = cookies.token;
-
-			const rateLimiterRes = await checkRateLimit(token, 1);
-			if(rateLimiterRes === null) return new Response("Internal Server Error", { status: 500 });
-
-			const headers = {
-				"Retry-After": rateLimiterRes.msBeforeNext / 1000,
-				"X-RateLimit-Remaining": rateLimiterRes.remainingPoints,
-				"X-RateLimit-Reset": new Date(Date.now() + rateLimiterRes.msBeforeNext)
-			}
-
-			if(rateLimiterRes.remainingPoints <= 0) return new Response("Too Many Requests!", { status: 429 , headers }); 
-
-			const imageID = URL(req.url).searchParams.get("id") || null;
-
-			headers["Set-Cookie"] = cookiesToString(cookies);;
- 
-			const success = server.upgrade(req, { data: { token, imageID }, headers });
-			return success ? undefined : new Response("WebSocket upgrade error", { status: 400 });
-		}
-
-	*/
-	/*
-	websocket: {
-		idleTimeout: 60,
-		async open(ws) {
-			const token = ws.data.token;
-			const imageID = ws.data.imageID;
-			const websocketID = uuidv4();
-
-			let user = await getUser({ token });
-
-			if (user === null) {
-				const userID = uuidv4();
-				user = await addUser({ id: userID, username: "john_doe", token: token });
-			}
-
-			const socket = await addWebsocket({ id: websocketID, userID: user.id, imageID, ws });
-
-			const CHILD_DATA = {
-				socket_id: socket.id,
-				id: imageID,
-			};
-
-			const worker = new Worker("src/imageMaker.js", {
-				workerData: [ JSON.stringify(CHILD_DATA) ],
-			});
-
-			worker.addEventListener("error", event => {
-				console.log(event);
-			});
-
-			worker.addEventListener("messageerror", event => {
-				console.log(event);
-			});
-
-			worker.addEventListener("message", async e => {
-				const websocket = await getWebsocket({ id: socket.id });
-
-				websocket.send(JSON.stringify(e.data));
-			});
-
-			worker.addEventListener("close", async e => {
-				const websocket = await getWebsocket({ id: CHILD_DATA.socket_id });
-
-					if (e.code !== 0) {
-						// Unhandled error
-						console.log(`Ended with exitCode: ${e.code}`);
-						await updateImage({ id: CHILD_DATA.id, key: "status", value: StatusCodes.error });
-						const msg = {
-							message: "There was an internal error",
-							status: StatusCodes.error,
-						};
-						return websocket.send(JSON.stringify(msg));
-					}
-
-					// Send to websocket
-					websocket.send(
-						JSON.stringify({info: `Ended with exitCode: ${e.code}`})
-					);
-			});
-			
-		},
-		message(ws, message) {},
-		close(ws) {},
-	},
-	*/
 	
 app.listen(process.env.PORT);
 console.log(`Listening on localhost:${process.env.PORT}`);

@@ -36,25 +36,6 @@ function rgbToHex(r, g, b) {
 			parentPort.postMessage({ status: StatusCodes.error, erorr_code: error, message: "Image could not be found" });
 			return process.exit(0);
 		}
-
-		/*
-		if (imageData.status !== StatusCodes.starting) { // Has already started
-			let img = await getImage({ id: data.id });
-
-			while (img.status === StatusCodes.running) {
-				// If running
-				await Bun.sleep(5000); // Sleep for 5 seconds
-				img = await getImage({ id: data.id });
-				parentPort.postMessage({ status: img.status});
-
-			}
-
-			if(img.status === StatusCodes.error) parentPort.postMessage({ status: img.status})
-			else if(img.status === StatusCodes.done) parentPort.postMessage({ minecraft_image: img.minecraft_file, percentage: 100, status: img.status})
-
-			return;
-		}
-		*/
 		
 		await updateImage({ id: imageData.id, key: "status", value: StatusCodes.running });
 		parentPort.postMessage({ status: StatusCodes.running });
