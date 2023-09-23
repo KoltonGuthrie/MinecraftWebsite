@@ -55,12 +55,13 @@ const upload = multer({
 const sharp = require('sharp');
 const { Image } = require('image-js');
 
-
 const express = require('express');
 
 const app = express();
 const ws = require('express-ws')(app);
 
+// set the view engine to ejs
+app.set('view engine', 'ejs');
 
 const { addImage, updateImage, getImage, addWebsocket, getUser, addUser, getWebsocket, getWebsockets } = require("./src/database.js");
 
@@ -196,7 +197,9 @@ app.get("/image", async (req, res) => {
 
 			if (image === null) return res.status(404).set(headers).send(`Unknown image id!`);
 
-			return res.status(200).set(headers).sendFile("public/image.html", {root: __dirname});
+			const ejs = path.join(__dirname, "public/image.ejs");
+
+			return res.status(200).set(headers).render(ejs, {filename: image.original_file_name, image_id: image.id});
 		});
 
 app.get("/view", async (req, res) => {
@@ -303,7 +306,7 @@ async function sendToWebsockes({id, user_id, image_id, str = "{}"}) {
 		if(obj.ws === undefined) continue;
 		await obj.ws.send(str);
 	}
-	
+
 	return;
 }
 	
