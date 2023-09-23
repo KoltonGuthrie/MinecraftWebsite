@@ -87,6 +87,7 @@ function rgbToHex(r, g, b) {
 		for (let w = 0; widthSlices > w; w++) {
 			// loop width
 			for (let h = 0; heightSlices > h; h++) {
+				await sleep(0);
 				// loop height
 				runs++;
 
@@ -171,3 +172,5 @@ function rgbToHex(r, g, b) {
 
 	}
 })();
+
+const sleep = ms => new Promise(resolve => setTimeout(resolve, ms))

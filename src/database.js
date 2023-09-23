@@ -132,7 +132,8 @@ async function getWebsockets({id = '%', user_id = '%', image_id = '%', data = fa
 
 	for(let i = 0; i < row.length; i++) {
 		const obj = row[i];
-		const ws = await getWebsocket({id, user_id, image_id, data: false});
+		const ws = await getWebsocket({id: obj.id, user_id: obj.user_id, image_id: obj.image_id, data: false});
+		if(ws.readyState !== 1) ws = undefined;
 		obj["ws"] = ws;
 		arr.push(obj);
 	}

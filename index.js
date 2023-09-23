@@ -286,7 +286,8 @@ app.ws('/', async (ws, req) => {
 		return ws.send(JSON.stringify({ minecraft_image: image.minecraft_file, percentage: 100, status: StatusCodes.done}));
 	}
 
-	await addWebsocket({id: uuidv4(), user_id: user.id, image_id: image.id, ws});
+	const s = await addWebsocket({id: uuidv4(), user_id: user.id, image_id: image.id, ws});
+	console.log(s);
 
 	return;
 });
@@ -298,10 +299,11 @@ app.get('*', async (req, res) => {
 async function sendToWebsockes({id, user_id, image_id, str = "{}"}) {
 	const websockets = await getWebsockets({id, user_id, image_id});
 
-	for(_ of websockets) {
-		if(_.ws === undefined) break;
-		_.ws.send(str);
+	for(const obj of websockets) {
+		if(obj.ws === undefined) continue;
+		await obj.ws.send(str);
 	}
+	
 	return;
 }
 	
