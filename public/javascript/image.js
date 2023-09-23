@@ -94,7 +94,7 @@ function activateWebSocket() {
 }
 
 function setBar(n) {
-  const percentage = Math.min(Math.ceil(n), 100);
-  document.querySelector("#bar").style.width = `${percentage}%`;
+  const percentage = Math.min(Math.floor(n), 100);
+  $("#bar").css("width", `${percentage}%`);
   $("#percentage").text(`${percentage}%`)
 }
