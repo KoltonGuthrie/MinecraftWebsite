@@ -218,6 +218,7 @@ app.get("/view", async (req, res) => {
 			const width = Number(req.query.width) || null;
 			const height = Number(req.query.height) || null;
 			const webp = req.query.webp || "false";
+			const quality = Number(req.query.quality) || null;
 			/*
 			const imageID = URL(req.url).searchParams.get("id") || null;
 			const getOriginal = URL(req.url).searchParams.get("original") || false;
@@ -241,8 +242,10 @@ app.get("/view", async (req, res) => {
 			}
 
 			if(webp === "true") {
-				imageFile = imageFile.webp({lossless: true});
+				imageFile = imageFile.webp({lossless: false, quality: quality ? quality : 80});
 				filename = filename.slice(0, filename.lastIndexOf(".")) + ".webp";
+			} else if(quality) {
+				imageFile = imageFile.png({quality})
 			}
 
 			headers['Content-Disposition'] = `attachment; filename="${filename}"`;
