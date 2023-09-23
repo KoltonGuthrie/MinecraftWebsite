@@ -226,7 +226,7 @@ app.get("/view", async (req, res) => {
 			let imageFile = null;
 			let filename = image.original_file_name;
 
-			if(getOriginal) {
+			if(getOriginal === "true") {
 				imageFile = sharp(image.original_file).resize({width, height});
 			} else {
 				imageFile = sharp(image.minecraft_file).resize({width, height});
