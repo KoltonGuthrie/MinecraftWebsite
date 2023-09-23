@@ -206,7 +206,7 @@ app.get("/view", async (req, res) => {
 			if(rateLimiterRes.remainingPoints <= 0) return res.status(429).set(headers).send("Too Many Requests!"); 
 
 			const imageID = req.query.id || null;
-			const getOriginal = req.query.id || false;
+			const getOriginal = req.query.original || false;
 			const width = Number(req.query.width) || null;
 			const height = Number(req.query.height) || null;
 			/*
