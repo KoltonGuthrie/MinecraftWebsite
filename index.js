@@ -206,9 +206,10 @@ app.get("/view", async (req, res) => {
 			if(rateLimiterRes.remainingPoints <= 0) return res.status(429).set(headers).send("Too Many Requests!"); 
 
 			const imageID = req.query.id || null;
-			const getOriginal = req.query.original || false;
+			const getOriginal = req.query.original || "false";
 			const width = Number(req.query.width) || null;
 			const height = Number(req.query.height) || null;
+			const webp = req.query.webp || "false";
 			/*
 			const imageID = URL(req.url).searchParams.get("id") || null;
 			const getOriginal = URL(req.url).searchParams.get("original") || false;
@@ -219,20 +220,26 @@ app.get("/view", async (req, res) => {
 
 			if (image === null) return res.status(404).set(headers).send(`Unknown image id!`);
 			//if (image.status !== StatusCodes.done) return new Response(`Not done creating image!`, { status: 404, headers });
-			if (image.minecraft_file === undefined && getOriginal === false) return res.status(404).set(headers).send(`There is no finished image!`);
-			if (image.original_file === undefined && getOriginal === true) return res.status(404).set(headers).send(`There is no original image!`);
+			if (image.minecraft_file === undefined && getOriginal === "false") return res.status(404).set(headers).send(`There is no finished image!`);
+			if (image.original_file === undefined && getOriginal === "true") return res.status(404).set(headers).send(`There is no original image!`);
 
 			let imageFile = null;
+			let filename = image.original_file_name;
 
 			if(getOriginal) {
-				imageFile = await sharp(image.original_file).resize({width, height}).toBuffer();
+				imageFile = sharp(image.original_file).resize({width, height});
 			} else {
-				imageFile = await sharp(image.minecraft_file).resize({width, height}).toBuffer();
+				imageFile = sharp(image.minecraft_file).resize({width, height});
 			}
 
-			headers['Content-Disposition'] = `attachment; filename="${image.original_file_name || image.id}"`;
+			if(webp === "true") {
+				imageFile = imageFile.webp({lossless: true});
+				filename = filename.slice(0, filename.lastIndexOf(".")) + ".webp";
+			}
 
-			return res.status(200).set(headers).send(imageFile);
+			headers['Content-Disposition'] = `attachment; filename="${filename}"`;
+
+			return res.status(200).set(headers).send(await imageFile.toBuffer());
 		});
 
 app.ws('/', async (ws, req) => {

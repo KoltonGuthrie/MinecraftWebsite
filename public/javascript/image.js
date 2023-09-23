@@ -16,7 +16,7 @@ const windowHeight = window.innerHeight;
 const minDiff = 150; // px
 
 $(document).ready(function () {
-    $('.hero-image').css('background-image', `url(/view?id=${imageID}&original=true&quality=10&width=${windowWidth}&height=${windowHeight})`);
+    $('.hero-image').css('background-image', `url(/view?id=${imageID}&original=true&quality=10&width=${windowWidth}&height=${windowHeight}&webp=true)`);
 
   
     $(".hero").height(window.innerHeight);
