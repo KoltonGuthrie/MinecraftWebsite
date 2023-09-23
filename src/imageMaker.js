@@ -91,7 +91,7 @@ function rgbToHex(r, g, b) {
 				runs++;
 
 				const percentage = runs / totalBlocks * 100;
-				if(new Date().getTime() - lastSend > 100 ) {
+				if(new Date().getTime() - lastSend > 1000 ) {
 					parentPort.postMessage({percentage: percentage})
 					lastSend = new Date().getTime();
 				};
