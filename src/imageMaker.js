@@ -5,7 +5,6 @@ const fs = require('fs');
 const { workerData, parentPort } = require('node:worker_threads');
 const { Image } = require("image-js");
 const NearestColor = require("nearest-color");
-const path = require('path');
 
 function rgbToHex(r, g, b) {
     return "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
@@ -37,7 +36,7 @@ function rgbToHex(r, g, b) {
 			parentPort.postMessage({ status: StatusCodes.error, erorr_code: error, message: "Image could not be found" });
 			return process.exit(0);
 		}
-
+		
 		await updateImage({ id: imageData.id, key: "status", value: StatusCodes.running });
 		parentPort.postMessage({ status: StatusCodes.running });
 
@@ -134,14 +133,14 @@ function rgbToHex(r, g, b) {
 
 		parentPort.postMessage({percentage: 99}) // Send 99% before the file saves
 
-		const folderPath = `../images/${imageData.id}`;
+		const folderPath = `./images/${imageData.id}`;
         const filePah = `/minecraft_image.png`;
 
-        if (!fs.existsSync(path.join(__dirname, folderPath))) {
-            fs.mkdirSync(path.join(__dirname, folderPath));
+        if (!fs.existsSync(folderPath)) {
+            fs.mkdirSync(folderPath);
         }
 
-		await mcImage.save(path.join(__dirname, folderPath, filePah));
+		await mcImage.save(`${folderPath}${filePah}`);
 		await updateImage({ id: imageData.id, key: "minecraft_file", value: `${folderPath}${filePah}` });
 
 		await updateImage({ id: imageData.id, key: "status", value: StatusCodes.done });
