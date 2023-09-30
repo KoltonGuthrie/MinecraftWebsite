@@ -37,7 +37,6 @@ $(document).ready(function () {
 	});
 
 	$("#upload-form").on("submit", function(e) {
-		console.log(this);
 		e.preventDefault();
 
 		$.ajax({
@@ -63,8 +62,18 @@ $(document).ready(function () {
 			window.location = `image/?id=${e.image_id}`;
 		  },
 		  error: function(e) {
-			console.error(e);
-			console.error("ERROR!");
+			if(e.status === 429) {
+				alertify.error(`${e.status}: ${e.statusText}`);
+				alertify.warning(`You have sent too many request. Please try again.`);
+			} else {
+				alertify.error(`${e.status}: ${e.statusText}`);
+			}
+
+			$(".bar").css("width", `0%`);
+			$(".percentage").text('');
+			$(".loading").addClass("hide");
+			$(".loading-bar").addClass("hide");
+			$("#file").prop("disabled", false);
 		  }
 		});
 	});
