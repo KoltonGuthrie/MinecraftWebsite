@@ -66,7 +66,7 @@ app.set('view engine', 'ejs');
 const { addImage, updateImage, getImage, addWebsocket, getUser, addUser, getWebsocket, getWebsockets } = require("./src/database.js");
 
 const opts = {
-	points: 50, // 100 points
+	points: 25, // 100 points
 	duration: 1 * 60, // Per min
 	};
 
@@ -79,7 +79,7 @@ app.get("/", async (req, res) => {
 
 	const token = getToken(req);
 
-	const rateLimiterRes = await checkRateLimit(token, 1);
+	const rateLimiterRes = await checkRateLimit(token, 0);
 	if(rateLimiterRes === null) return res.status(500).send("Internal Server Error");
 
 	const headers = {
@@ -88,7 +88,7 @@ app.get("/", async (req, res) => {
 		"X-RateLimit-Reset": new Date(Date.now() + rateLimiterRes.msBeforeNext)
 	}
 
-	if(rateLimiterRes.remainingPoints <= 0) return res.status(429).set(headers).send("Too Many Requests!"); 
+	if(!rateLimiterRes.success) return res.status(429).set(headers).send("Too Many Requests!"); 
 
 	return res.status(200).set(headers).sendFile("public/home.html", {root: __dirname});
 });
@@ -106,7 +106,7 @@ app.post("/upload", async (req, res) => {
 		"X-RateLimit-Reset": new Date(Date.now() + rateLimiterRes.msBeforeNext)
 	}
 
-	if(rateLimiterRes.remainingPoints <= 0) return res.status(429).set(headers).send("Too Many Requests!"); 
+	if(!rateLimiterRes.success) return res.status(429).set(headers).send("Too Many Requests!"); 
 
 	upload(req, res, async function(err) {
 				if(err) {
@@ -186,7 +186,7 @@ app.post("/upload", async (req, res) => {
 app.get("/image", async (req, res) => {
 	const token = getToken(req);
 
-			const rateLimiterRes = await checkRateLimit(token, 2);
+			const rateLimiterRes = await checkRateLimit(token, 0);
 			if(rateLimiterRes === null) return res.status(500).send("Internal Server Error");
 
 			const headers = {
@@ -195,7 +195,7 @@ app.get("/image", async (req, res) => {
 				"X-RateLimit-Reset": new Date(Date.now() + rateLimiterRes.msBeforeNext)
 			}
 
-			if(rateLimiterRes.remainingPoints <= 0) return res.status(429).set(headers).send("Too Many Requests!"); 
+			if(!rateLimiterRes.success) return res.status(429).set(headers).send("Too Many Requests!"); 
 
 			const imageID = req.query.id || null;
 			const image = await getImage({ id: imageID });
@@ -210,7 +210,7 @@ app.get("/image", async (req, res) => {
 app.get("/view", async (req, res) => {
 			const token = getToken(req);
 
-			const rateLimiterRes = await checkRateLimit(token, 2);
+			const rateLimiterRes = await checkRateLimit(token, 0);
 			if(rateLimiterRes === null) return res.status(500).send("Internal Server Error");
 
 			const headers = {
@@ -219,7 +219,7 @@ app.get("/view", async (req, res) => {
 				"X-RateLimit-Reset": new Date(Date.now() + rateLimiterRes.msBeforeNext)
 			}
 
-			if(rateLimiterRes.remainingPoints <= 0) return res.status(429).set(headers).send("Too Many Requests!"); 
+			if(!rateLimiterRes.success) return res.status(429).set(headers).send("Too Many Requests!"); 
 
 			const imageID = req.query.id || null;
 			const getOriginal = req.query.original || "false";
@@ -264,7 +264,7 @@ app.get("/view", async (req, res) => {
 app.ws('/', async (ws, req) => {
 	let token = getToken(req);
 
-	const rateLimiterRes = await checkRateLimit(token, 1);
+	const rateLimiterRes = await checkRateLimit(token, 0);
 	if(rateLimiterRes === null) return ws.close(1011, "Internal Server Error");
 
 	const headers = {
@@ -273,7 +273,7 @@ app.ws('/', async (ws, req) => {
 		"X-RateLimit-Reset": new Date(Date.now() + rateLimiterRes.msBeforeNext)
 	}
 
-	if(rateLimiterRes.remainingPoints <= 0) return ws.close(1013, "Too Many Requests!"); 
+	if(!rateLimiterRes.success) return ws.close(1013, "Too Many Requests!"); 
 
 	const imageID = req.query.id || null;
 
@@ -346,7 +346,9 @@ async function checkRateLimit(token, amount) {
 
 	try {
 		rateLimiterRes = await rateLimiter.consume(token, amount);
+		rateLimiterRes.success = true;
 	} catch(rate) {
+		rate.success = false;
 		rateLimiterRes = rate;
 	}
 
