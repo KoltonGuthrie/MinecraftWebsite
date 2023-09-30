@@ -1,5 +1,4 @@
 require('dotenv').config();
-const stream = require('stream');
 const { parse, serialize } = require("cookie");
 const { v4: uuidv4 } = require("uuid");
 const { StatusCodes } = require("./src/statusCodes.js");
@@ -53,7 +52,6 @@ const upload = multer({
 }).single('image');
 
 const sharp = require('sharp');
-const { Image } = require('image-js');
 
 const express = require('express');
 
@@ -63,7 +61,7 @@ const ws = require('express-ws')(app);
 // set the view engine to ejs
 app.set('view engine', 'ejs');
 
-const { addImage, updateImage, getImage, addWebsocket, getUser, addUser, getWebsocket, getWebsockets } = require("./src/database.js");
+const { addImage, updateImage, getImage, addWebsocket, getUser, addUser, getWebsockets } = require("./src/database.js");
 
 const opts = {
 	points: 25, // 100 points
@@ -163,12 +161,10 @@ app.post("/upload", async (req, res) => {
 							status: StatusCodes.error,
 						};
 						return await sendToWebsockes({image_id: CHILD_DATA.id, str: JSON.stringify(msg)})
-						//return websocket.send(JSON.stringify(msg));
 					}
 
 					// Send to websocket
 					await sendToWebsockes({image_id: CHILD_DATA.id, str: JSON.stringify({info: `Ended with exitCode: ${e.code}`})})
-					//websocket.send(JSON.stringify({info: `Ended with exitCode: ${e.code}`}));
 					
 					worker.removeAllListeners('error');
 					worker.removeAllListeners('messageerror');
@@ -176,7 +172,6 @@ app.post("/upload", async (req, res) => {
 					worker.removeAllListeners('close');
 
 					await worker.terminate();
-					console.log("Terminated!");
 			});
 
 			return res.set(headers).send({image_id: imageID, user_token: token });
@@ -227,16 +222,10 @@ app.get("/view", async (req, res) => {
 			const height = Number(req.query.height) || null;
 			const webp = req.query.webp || "false";
 			const quality = Number(req.query.quality) || null;
-			/*
-			const imageID = URL(req.url).searchParams.get("id") || null;
-			const getOriginal = URL(req.url).searchParams.get("original") || false;
-			const width = Number(URL(req.url).searchParams.get("width")) || null;
-			const height = Number(URL(req.url).searchParams.get("height")) || null;
-			*/
+
 			const image = await getImage({ id: imageID });
 
 			if (image === null) return res.status(404).set(headers).send(`Unknown image id!`);
-			//if (image.status !== StatusCodes.done) return new Response(`Not done creating image!`, { status: 404, headers });
 			if (image.minecraft_file === undefined && getOriginal === "false") return res.status(404).set(headers).send(`There is no finished image!`);
 			if (image.original_file === undefined && getOriginal === "true") return res.status(404).set(headers).send(`There is no original image!`);
 
@@ -295,7 +284,6 @@ app.ws('/', async (ws, req) => {
 	}
 
 	const s = await addWebsocket({id: uuidv4(), user_id: user.id, image_id: image.id, ws});
-	console.log(s);
 
 	return;
 });
