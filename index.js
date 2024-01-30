@@ -61,7 +61,7 @@ const ws = require('express-ws')(app);
 // set the view engine to ejs
 app.set('view engine', 'ejs');
 
-const { addImage, updateImage, getImage, addWebsocket, getUser, addUser, getWebsockets } = require("./src/database.js");
+const { addImage, updateImageStatus, getImage, addWebsocket, getUser, addUser, getWebsockets } = require("./src/database.js");
 
 const opts = {
 	points: 25, // 100 points
@@ -155,7 +155,7 @@ app.post("/upload", async (req, res) => {
 					if (e.code !== 0) {
 						// Unhandled error
 						console.log(`Ended with exitCode: ${e.code}`);
-						await updateImage({ id: CHILD_DATA.id, key: "status", value: StatusCodes.error });
+						await updateImageStatus({ id: CHILD_DATA.id, value: StatusCodes.error });
 						const msg = {
 							message: "There was an internal error",
 							status: StatusCodes.error,

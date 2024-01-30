@@ -57,11 +57,21 @@ async function init() {
 	await db.close();
 }
 
-async function updateImage({ id = "%", key, value }) {
-    if(!key || !value) return null;
+async function updateImageStatus({ id, value }) {
+    if(!id || !value) return null;
 
 	const db = await connect();
-    await db.run(`UPDATE images SET ${key} = ? WHERE id LIKE ?;`,[value, id]);
+    await db.run(`UPDATE images SET status = ? WHERE id = ?;`,[value, id]);
+	await db.close();
+
+    return await getImage({ id });
+}
+
+async function updateImageMinecraftFile({ id, value }) {
+    if(!id || !value) return null;
+
+	const db = await connect();
+    await db.run(`UPDATE images SET minecraft_file = ? WHERE id = ?;`,[value, id]);
 	await db.close();
 
     return await getImage({ id });
@@ -142,5 +152,5 @@ async function getWebsockets({id = '%', user_id = '%', image_id = '%', data = fa
 }
 
 module.exports = {
-	init, updateImage, addImage, getImage, addUser, getUser, addWebsocket, getWebsocket, getWebsockets
+	init, updateImageStatus, updateImageMinecraftFile, addImage, getImage, addUser, getUser, addWebsocket, getWebsocket, getWebsockets
 }

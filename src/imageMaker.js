@@ -1,6 +1,6 @@
 const { StatusCodes } = require("./statusCodes.js");
 const { ErrorCodes } = require("./errorCodes.js");
-const { getImage, updateImage } = require("./database.js");
+const { getImage, updateImageStatus, updateImageMinecraftFile } = require("./database.js");
 const fs = require('fs');
 const { workerData, parentPort } = require('node:worker_threads');
 const { Image } = require("image-js");
@@ -37,7 +37,7 @@ function rgbToHex(r, g, b) {
 			return process.exit(0);
 		}
 		
-		await updateImage({ id: imageData.id, key: "status", value: StatusCodes.running });
+		await updateImageStatus({ id: imageData.id, value: StatusCodes.running });
 		parentPort.postMessage({ status: StatusCodes.running });
 
 		let blocks = await JSON.parse(fs.readFileSync(`src/savedBlocks.json`));
@@ -153,9 +153,9 @@ function rgbToHex(r, g, b) {
         }
 
 		await mcImage.save(`${folderPath}${filePath}`);
-		await updateImage({ id: imageData.id, key: "minecraft_file", value: `${folderPath}${filePath}` });
+		await updateImageMinecraftFile({ id: imageData.id, value: `${folderPath}${filePath}` });
 
-		await updateImage({ id: imageData.id, key: "status", value: StatusCodes.done });
+		await updateImageStatus({ id: imageData.id, value: StatusCodes.done });
 		
 		parentPort.postMessage({ minecraft_image: `${folderPath}${filePath}`, percentage: 100, status: StatusCodes.done})
 
